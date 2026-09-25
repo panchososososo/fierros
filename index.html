@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Fierro</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#000000;--surface:#0D1013;--surface2:#161B20;--ink:#EDF1F3;--muted:#8E9BA5;--line:#232B33;
+  --red:#FF4D5E;--blue:#4C8FDB;--yellow:#F5C23B;--green:#3DD68C;--purple:#A487CF;--orange:#F59A4A;--slate:#8D9DAA;--teal:#2DC0C0;
+  --done:#0F2A1D;--onink:#000;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);
+}
+:root[data-theme="light"]{
+  --bg:#EEF1F0;--surface:#FFFFFF;--surface2:#F3F5F4;--ink:#1F2A33;--muted:#5E6B75;--line:#D4DAD8;
+  --red:#D7263D;--blue:#1B5FA8;--yellow:#C98F00;--green:#1E8A50;--purple:#7A5AA6;--orange:#D0680F;--slate:#6B7C8A;--teal:#127F7F;
+  --done:#E1F3E8;--onink:#fff;
+}
+@media (prefers-color-scheme:light){:root[data-theme="auto"]{
+  --bg:#EEF1F0;--surface:#FFFFFF;--surface2:#F3F5F4;--ink:#1F2A33;--muted:#5E6B75;--line:#D4DAD8;
+  --red:#D7263D;--blue:#1B5FA8;--yellow:#C98F00;--green:#1E8A50;--purple:#7A5AA6;--orange:#D0680F;--slate:#6B7C8A;--teal:#127F7F;
+  --done:#E1F3E8;--onink:#fff;}}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 Barlow,"Segoe UI",Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:contain}
+h1,h2,h3,.num,.cond{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding:10px 14px calc(170px + env(safe-area-inset-bottom,0px))}
+header.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0 10px}
+header.bar h1{margin:0;font-size:30px;font-weight:700;letter-spacing:.3px;display:flex;align-items:center;gap:10px}
+.plates{display:inline-flex;align-items:center;gap:2px;height:24px}.plates i{display:block;width:6px;border-radius:2px}
+h2{font-size:23px;font-weight:600;margin:22px 0 8px}
+h3{font-size:21px;font-weight:600;margin:0;line-height:1.15}
+.muted{color:var(--muted)}.small{font-size:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.banner{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--yellow);border-radius:10px;padding:10px 12px;margin-bottom:12px;display:flex;gap:10px;align-items:center}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);padding:6px 12px;border-radius:999px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--onink);border-color:var(--ink)}
+.btn{border:0;background:var(--ink);color:var(--onink);font:600 18px "Barlow Condensed",Arial,sans-serif;letter-spacing:.3px;padding:12px 18px;border-radius:10px;min-height:48px}
+.btn.full{width:100%}.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:transparent;color:var(--red);border:1px solid var(--line)}
+.btn.small{font-size:16px;padding:8px 12px;min-height:40px}
+.btn.go{background:var(--green);color:#000}
+.link{background:none;border:0;color:var(--blue);font-weight:600;padding:10px 4px;min-height:40px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.grow{flex:1}
+.card{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--gc,var(--ink));border-radius:12px;padding:12px 10px 8px 12px;margin-bottom:12px}
+.card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+select.variant{margin-top:4px;max-width:100%;font-size:14px;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface2)}
+.tool{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:13px;font-weight:600;min-height:34px}
+.why{font-size:14px;margin:8px 0 2px}
+.last{font-size:13px;color:var(--muted);margin:2px 0 6px;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;font:600 12px Barlow,Arial,sans-serif;padding:2px 7px;border-radius:6px;margin-right:6px;color:#000;vertical-align:1px}
+.b-up{background:var(--green)}.b-keep{background:var(--yellow)}.b-down{background:var(--red)}.b-new{background:var(--slate)}.b-split{background:var(--purple)}
+table.sets{width:100%;border-collapse:separate;border-spacing:0 4px;table-layout:fixed}
+table.sets th{font-size:11px;font-weight:600;color:var(--muted);text-align:center;letter-spacing:.5px;padding-bottom:2px}
+table.sets td{text-align:center;padding:0;background:var(--surface2);height:50px}
+table.sets td:first-child{border-radius:8px 0 0 8px;font-weight:600;border-left:4px solid transparent}
+table.sets td:last-child{border-radius:0 8px 8px 0}
+table.sets tr.ok td{background:var(--done)}
+table.sets tr.warm td:first-child .lbl{color:var(--yellow)}
+table.sets tr.drop td:first-child .lbl{color:var(--purple)}
+table.sets tr.fb-pr td:first-child,table.sets tr.fb-up td:first-child{border-left-color:var(--green)}
+table.sets tr.fb-eq td:first-child{border-left-color:var(--yellow)}
+table.sets tr.fb-down td:first-child{border-left-color:var(--red)}
+.prtag{display:block;font:700 10px Barlow,Arial,sans-serif;color:var(--green);letter-spacing:.5px}
+.prev{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.2;word-break:break-word}
+table.sets input{width:100%;text-align:center;border:0;background:transparent;font:600 21px "Barlow Condensed",Arial,sans-serif;padding:10px 0;font-variant-numeric:tabular-nums}
+table.sets tr:not(.ok) input.sug{color:var(--muted)}
+.lblbtn{background:none;border:0;font:inherit;color:inherit;width:100%;height:100%;padding:0}
+.rir{background:none;border:0;width:100%;height:50px;font:600 17px "Barlow Condensed",Arial,sans-serif;color:var(--ink)}
+.rir.empty{color:var(--muted)}
+.check{width:42px;height:42px;border-radius:10px;border:2px solid var(--line);background:var(--surface);display:inline-grid;place-items:center;font-size:20px;line-height:1;color:var(--muted)}
+tr.ok .check{background:var(--green);border-color:var(--green);color:#000}
+.play{width:42px;height:42px;border-radius:10px;border:2px solid var(--line);background:var(--surface);font-size:16px;color:var(--ink)}
+.setbtns{display:flex;gap:2px;justify-content:space-between}
+.del{background:none;border:0;color:var(--muted);font-size:22px;padding:2px 8px;min-width:40px;min-height:40px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.stat{background:var(--surface);padding:12px}.stat .num{font-size:28px;font-weight:600;line-height:1.1}.stat .lbl{font-size:13px;color:var(--muted)}
+.list{list-style:none;margin:0;padding:0}
+.list li{border-bottom:1px solid var(--line);padding:12px 2px}.list li:last-child{border-bottom:0}
+.hitem{display:flex;justify-content:space-between;gap:10px;align-items:center;width:100%;background:none;border:0;text-align:left;padding:0}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px))}
+nav.tabs button{flex:1;border:0;background:none;color:var(--muted);font:600 12px Barlow,Arial,sans-serif;padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:8px}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-selected="true"]{color:var(--ink)}
+nav.tabs button[aria-selected="true"] svg{color:var(--red)}
+#dock{position:fixed;left:0;right:0;bottom:calc(60px + env(safe-area-inset-bottom,0px));z-index:19;display:none;padding:0 10px 6px}
+#dock .in{max-width:720px;margin:0 auto;background:var(--surface2);border:1px solid var(--line);border-radius:14px;display:flex;align-items:center;gap:8px;padding:8px;box-shadow:0 -6px 20px rgba(0,0,0,.35)}
+#dock .num{font-size:30px;font-weight:700;min-width:70px;font-variant-numeric:tabular-nums;padding-left:4px}
+#dock .prog{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden;min-width:30px}
+#dock .prog i{display:block;height:100%;background:var(--green)}
+#dock .db{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:48px;min-height:48px;font-weight:600;padding:0 10px}
+#dock.alarm .in{background:var(--green);color:#000;border-color:var(--green)}
+#dock.alarm .db{background:#000;color:var(--green);border-color:#000}
+.field{display:grid;gap:4px;margin-bottom:10px}
+.field label{font-size:14px;color:var(--muted)}
+.field input,.field select,.field textarea{border:1px solid var(--line);background:var(--surface2);border-radius:8px;padding:10px;width:100%;min-height:44px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+dialog{border:0;border-top:1px solid var(--line);border-radius:18px 18px 0 0;background:var(--surface);color:var(--ink);padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));width:100%;max-width:720px;margin:auto auto 0;max-height:88vh;overflow:auto}
+dialog::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 10px}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));background:var(--ink);color:var(--onink);padding:10px 16px;border-radius:10px;z-index:50;font-weight:500;max-width:90vw;display:none}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font:20px Barlow,Arial,sans-serif}
+.chart .grid{stroke:var(--line)}
+.prs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.pr{border-left:4px solid var(--red);padding:2px 0 2px 10px}.pr:nth-child(2){border-color:var(--blue)}.pr:nth-child(3){border-color:var(--yellow)}.pr:nth-child(4){border-color:var(--green)}
+.pr .num{font-size:24px;font-weight:600;line-height:1.1}.pr .lbl{font-size:13px;color:var(--muted)}
+.ritem{display:flex;align-items:center;gap:6px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ritem:last-child{border-bottom:0}.ritem .grow{min-width:0}
+.ritem .t{font-weight:600}.ritem .d{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.icon{background:none;border:1px solid var(--line);border-radius:8px;width:40px;height:40px;display:grid;place-items:center;color:var(--ink)}
+.bignum{font:700 84px/1 "Barlow Condensed",Arial,sans-serif;text-align:center;font-variant-numeric:tabular-nums;margin:10px 0}
+.platebar{display:flex;align-items:center;justify-content:center;gap:3px;min-height:130px;margin:10px 0}
+.platebar .bar{width:70px;height:10px;background:var(--slate);border-radius:3px}
+.platebar .p{width:18px;border-radius:3px;display:grid;place-items:center;color:#000;font:700 11px Barlow,Arial,sans-serif;writing-mode:vertical-rl}
+.hidden{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="wrap">
+  <header class="bar">
+    <h1><span class="plates" aria-hidden="true"><i style="height:24px;background:var(--red)"></i><i style="height:21px;background:var(--blue)"></i><i style="height:17px;background:var(--yellow)"></i><i style="height:13px;background:var(--green)"></i></span>Fierro</h1>
+    <span class="small muted" id="syncState"></span>
+  </header>
+  <main id="view"></main>
+</div>
+<div id="dock"><div class="in" id="dockIn"></div></div>
+<nav class="tabs" role="tablist">
+  <button data-v="train" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/></svg>Entrenar</button>
+  <button data-v="history" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Historial</button>
+  <button data-v="progress" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19h16M6 15l4-5 3 3 5-7"/></svg>Progreso</button>
+  <button data-v="routine" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>Rutina</button>
+  <button data-v="settings" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3.5"/></svg>Ajustes</button>
+</nav>
+<dialog id="dlg"></dialog>
+<script id="seed" type="application/json">{"s":{"1":["2022-08-11 09:01","Nueva plantilla de entrenamiento",43],"2":["2022-08-16 07:37","jale",3786],"3":["2022-08-17 16:44","Nueva plantilla de entrenamiento",77],"4":["2022-08-18 07:35","pechito tricep hombro",2857],"5":["2022-08-19 07:33","jale",3109],"6":["2022-08-22 07:35","pechito tricep hombro",3593],"7":["2022-08-23 07:31","jale",4483],"8":["2022-08-24 07:35","Nueva plantilla de entrenamiento",3939],"9":["2022-08-25 07:48","pechito tricep hombro",2329],"10":["2022-08-29 07:37","pechito tricep hombro",3294],"11":["2022-08-30 07:36","jale",3000],"12":["2022-08-31 07:28","Nueva plantilla de entrenamiento",4474],"13":["2022-09-01 07:39","pechito tricep hombro",2841],"14":["2022-09-02 07:37","jale",2821],"15":["2022-09-12 07:38","pechito tricep hombro",4181],"16":["2022-09-13 07:33","jale",3446],"17":["2022-09-14 07:44","Nueva plantilla de entrenamiento",2287],"18":["2022-09-20 07:35","Nueva plantilla de entrenamiento",4399],"19":["2022-09-21 07:36","jale",3932],"20":["2022-09-22 07:42","deadlift",3438],"21":["2022-09-26 07:25","pechito tricep hombro",6455],"22":["2022-09-27 07:31","PIERNAA",4399],"23":["2022-09-28 07:39","ESPALDAA",5637],"24":["2022-09-29 16:40","Entrenamiento por la tarde",5762],"25":["2022-09-30 08:38","Entrenamiento por la mañana",619],"26":["2022-10-03 09:41","PECHOO",48],"27":["2022-10-04 07:33","PIERNAA",5297],"28":["2022-10-05 07:35","ESPALDAA",4353],"29":["2022-10-06 07:56","Entrenamiento por la mañana",3160],"30":["2022-10-07 07:51","Entrenamiento por la mañana",6004],"31":["2022-10-10 08:50","PECHOO",17881],"32":["2022-10-11 07:39","PIERNAA",3440],"33":["2022-10-12 07:34","ESPALDAA",4488],"34":["2022-10-13 16:34","Entrenamiento por la tarde",3131],"35":["2022-10-14 07:32","Entrenamiento por la mañana",3792],"36":["2022-10-17 07:18","PECHOO",6603],"37":["2022-10-18 06:59","PIERNAA",6223],"38":["2022-10-19 07:39","ESPALDAA",3272],"39":["2022-10-20 16:50","Entrenamiento por la tarde",2387],"40":["2022-10-21 19:59","Entrenamiento por la tarde noche",3449],"41":["2022-10-24 07:06","PECHOO",5555],"42":["2022-10-25 07:44","PIERNAA",3086],"43":["2022-10-27 07:39","Entrenamiento por la mañana",7625],"44":["2022-11-02 07:48","PIERNAA",3035],"45":["2022-11-03 07:34","PECHOO",4247],"46":["2022-11-04 09:40","Entrenamiento por la mañana",2121],"47":["2022-11-07 06:57","PECHOO",7486],"48":["2022-11-08 08:02","PIERNAA",2841],"49":["2022-11-09 07:45","ESPALDAA",4286],"50":["2022-11-10 07:32","Entrenamiento por la mañana",5584],"51":["2022-11-14 07:13","PECHOO",8500],"52":["2022-11-15 06:58","PIERNAA",9787],"53":["2022-11-16 07:41","ESPALDAA",7057],"54":["2022-11-17 08:10","Entrenamiento por la mañana",1713],"55":["2022-11-18 08:05","Entrenamiento por la mañana",3940],"56":["2022-11-21 06:50","PECHOO",9689],"57":["2022-11-22 12:40","PIERNAA",229],"58":["2022-11-23 07:37","ESPALDAA",5422],"59":["2023-04-21 18:52","ESPALDAA",2642],"60":["2023-04-24 07:39","PECHOO",6048],"61":["2023-04-25 06:23","PIERNAA",11014],"62":["2023-04-26 07:39","ESPALDAA",5354],"63":["2023-04-27 07:34","Morning Workout",9044],"64":["2023-04-28 19:04","Evening Workout",3933],"65":["2023-05-02 16:17","PECHOO",5260],"66":["2023-05-03 15:50","PIERNAA",4528],"67":["2023-05-04 15:08","ESPALDAA",5081],"68":["2023-05-05 16:06","Morning Workout",3999],"69":["2023-05-10 07:34","ESPALDAA",4886],"70":["2023-05-15 07:19","PECHOO",6499],"71":["2023-05-16 07:19","PIERNAA",8283],"72":["2023-07-31 14:00","PIERNAA",3741],"73":["2023-08-01 16:43","PECHOO",6085],"74":["2023-08-02 16:02","ESPALDAA",5042],"75":["2023-08-07 07:33","PECHOO",2657],"76":["2023-08-28 07:19","PECHOO",3487],"77":["2023-08-29 07:27","Entrenamiento por la mañana",2910],"78":["2023-08-31 07:32","Entrenamiento por la mañana",2684],"79":["2023-10-23 06:08","PECHOO",14148],"80":["2023-10-24 07:33","PIERNAA",4522],"81":["2023-10-25 07:30","ESPALDAA",3397],"82":["2023-10-27 14:32","Entrenamiento por la tarde",11191],"83":["2023-10-28 10:15","Entrenamiento por la mañana",6131],"84":["2023-11-03 06:53","PECHOO",5652],"85":["2023-11-08 15:11","pull 1",1669],"86":["2023-11-10 19:33","pull 1",9117],"87":["2023-11-11 08:42","push 1",7265],"88":["2023-11-12 08:19","legs 1",6836],"89":["2023-11-13 07:56","arms + back 1",5144],"90":["2023-11-15 06:46","pull 2",6971],"91":["2023-11-16 09:29","push 2",6129],"92":["2023-11-18 10:52","arms + back 2",4233],"93":["2023-11-20 08:05","pull 1",6922],"94":["2023-11-21 10:22","push 1",4707],"95":["2023-11-22 09:23","legs 1",5020],"96":["2023-11-23 09:13","arms + back 1",6443],"97":["2023-11-25 14:46","pull 2",5106],"98":["2023-11-26 11:19","push 2",5278],"99":["2023-11-27 08:45","legs 2",3771],"100":["2023-11-28 21:25","arms + back 2",4694],"101":["2023-11-30 20:43","pull 1",7255],"102":["2023-12-01 19:01","push 1",6924],"103":["2023-12-02 10:28","legs 1",4944],"104":["2023-12-03 08:41","arms + back 1",11042],"105":["2023-12-05 21:47","pull 2",7541],"106":["2023-12-06 16:09","push 2",5944],"107":["2023-12-07 22:01","legs 2",4376],"108":["2023-12-09 09:50","arms + back 2",5311],"109":["2023-12-10 10:41","push 1",4209],"110":["2023-12-12 10:07","pull 1",5456],"111":["2023-12-12 21:31","legs 1",4835],"112":["2023-12-13 21:43","arms + back 1",2162],"113":["2023-12-15 21:22","pull 2",3201],"114":["2023-12-16 10:53","push 2",5356],"115":["2023-12-18 21:33","arms + back 2",5299],"116":["2023-12-20 19:46","pull 1",5152],"117":["2023-12-21 21:56","push 1",3393],"118":["2023-12-23 12:15","arms + back 1",4392],"119":["2023-12-26 15:59","pull 2",5282],"120":["2023-12-27 21:35","push 2",4186],"121":["2023-12-28 19:26","legs 2",4029],"122":["2023-12-29 19:14","arms + back 2",7589],"123":["2024-01-02 19:40","pull 1",4513],"124":["2024-01-06 12:59","push 1",3706],"125":["2024-01-07 09:18","arms + back 1",6374],"126":["2024-01-08 08:24","pull 2",5376],"127":["2024-01-09 20:08","push 2",5645],"128":["2024-01-10 21:11","legs 2",5571],"129":["2024-01-11 12:49","arms + back 2",3964],"130":["2024-01-15 17:17","pull 1",6991],"131":["2024-01-17 14:04","legs 1",7303],"132":["2024-01-19 11:26","arms + back 1",5629],"133":["2024-01-21 10:40","pull 2",5595],"134":["2024-01-22 21:32","push 2",6602],"135":["2024-01-24 08:27","arms + back 2",4353],"136":["2024-01-27 12:11","pull 1",13085],"137":["2024-01-28 14:42","push 1",3675],"138":["2024-01-29 12:04","legs 2",6372],"139":["2024-02-01 10:41","pull 2",5771],"140":["2024-02-03 13:16","push 2",941668],"141":["2024-02-14 10:52","pull 1 week 1",20136],"142":["2024-02-15 15:30","push 1 week 1",6214],"143":["2024-02-17 12:18","legs 1 week 1",10060],"144":["2024-03-04 16:18","push 1 week 1",5648],"145":["2024-03-05 18:21","legs 1 week 1",5396],"146":["2024-03-09 13:53","pull 2",3601],"147":["2024-03-10 11:16","push 2",4910],"148":["2024-03-12 10:54","arms 2",3634],"149":["2024-03-14 13:02","pull 1 week 2",5242],"150":["2024-03-15 12:48","push 1 week 2",4554],"151":["2024-03-17 11:53","arms 1 week 2",5911],"152":["2024-03-19 16:57","pull 2 week 2",4027],"153":["2024-03-20 11:00","push 2 week 2",5681],"154":["2024-03-22 17:21","arms 2 week 2",5096],"155":["2024-03-24 09:00","legs 1 week 1",5762],"156":["2024-03-27 18:02","pull 1 week 2",5037],"157":["2024-03-29 11:20","push 1 week 2",4918],"158":["2024-04-02 10:25","full body 2",5127],"159":["2024-04-06 10:38","full body 4",0],"160":["2024-04-09 08:25","Entrenamiento por la mañana",7],"161":["2024-04-12 18:47","upper 2 week 2",4373],"162":["2024-04-16 10:14","full body 4",5090],"163":["2024-04-19 20:32","pull 1 week 1",6900],"164":["2024-04-27 11:29","pull 1 week 1",4150],"165":["2024-04-28 13:04","push 1 week 2",4295],"166":["2024-04-29 13:57","legs 1 week 1",6007],"167":["2024-05-03 07:43","pull 2",3923],"168":["2024-05-05 12:28","push 2 week 2",6648],"169":["2024-05-06 07:31","legs 2",5048],"170":["2024-05-07 11:15","arms 2 week 2",4258],"171":["2024-05-09 11:10","pull 1 week 2",5027],"172":["2024-05-10 09:50","push 1 week 2",4359],"173":["2024-05-12 10:31","arms 1 week 2",6293],"174":["2024-05-14 10:34","pull 2",5706],"175":["2024-05-20 15:29","push 2 week 2",587768],"176":["2024-05-27 14:52","pull 2",5136],"177":["2024-05-28 10:51","push 2 week 2",4825],"178":["2024-06-01 13:35","pull 1 week 2",-843219],"179":["2024-07-11 12:24","arms 1 week 2",5799],"180":["2024-07-13 08:40","push 2 week 2",4138],"181":["2024-07-14 14:30","pull 2",2192],"182":["2024-07-18 15:52","push 1 week 2",1018492],"183":["2024-11-25 10:12","pull 1",3372],"184":["2024-11-26 09:35","push 1 week 1",3361],"185":["2024-11-28 11:51","arms 1 week 2",3947],"186":["2024-11-30 10:06","pull 1",2916],"187":["2024-12-01 11:06","push 1 week 1",3052],"188":["2024-12-03 15:24","arms 1 week 2",2494],"189":["2024-12-05 14:23","pull 1",2777],"190":["2024-12-07 12:05","push 1 week 1",4484],"191":["2024-12-08 12:11","arms 1 week 2",2297],"192":["2024-12-12 13:45","pull 1",2180],"193":["2025-01-17 15:08","push 1 week 1",3230],"194":["2025-01-20 16:10","pull 1",3086],"195":["2025-01-21 13:03","push 1 week 1",3316],"196":["2025-01-22 16:28","pliometria",3146],"197":["2025-01-23 13:33","arms 1 week 2",3098],"198":["2025-01-26 09:15","pliometria y fuerza",4842],"199":["2025-01-27 13:48","pull 1",3631],"200":["2025-01-28 12:24","push 1 week 1",3303],"201":["2025-01-29 16:48","pliometria",881],"202":["2025-02-20 11:00","Entrenamiento por la mañana",51422],"203":["2025-02-21 13:27","Entrenamiento de mediodía",7530],"204":["2025-03-10 19:18","Fullbody A",5304],"205":["2025-03-26 19:15","Miercoles",7615],"206":["2025-03-31 13:19","Miercoles",5336],"207":["2025-03-31 18:47","Entrenamiento por la tarde noche",5756],"208":["2025-04-02 13:34","Miercoles",3979],"209":["2025-06-04 12:22","Entrenamiento de mediodía",3001],"210":["2025-08-04 17:01","lunes",3838],"211":["2025-08-06 14:20","Entrenamiento por la tarde",1258],"212":["2025-08-11 13:34","lunes",2566],"213":["2025-08-13 13:49","Entrenamiento por la tarde",2010],"214":["2025-08-18 13:35","lunes",5704],"215":["2025-08-20 13:47","miercoles",2577],"216":["2025-09-16 18:45","Entrenamiento por la tarde noche",1740],"217":["2025-10-06 09:33","Dia 1",6266],"218":["2025-10-08 12:41","dia 2",2723],"219":["2025-10-11 11:14","Dia 3",5042],"220":["2025-10-13 10:32","Dia 1",4943],"221":["2025-10-15 12:03","dia 2",7182],"222":["2025-10-17 08:46","Dia 3",3696],"223":["2025-10-20 17:23","Dia 1",4030],"224":["2025-10-22 12:03","dia 2",3728],"225":["2025-10-24 08:52","Dia 3",3800],"226":["2025-10-27 10:44","Dia 1",4739],"227":["2025-10-29 12:04","dia 2",3333],"228":["2025-11-24 10:18","Dia 1",3345],"229":["2026-01-19 16:32","lower A",4349],"230":["2026-01-20 16:13","Upper A",2459],"231":["2026-03-19 18:30","Evening Workout",5372],"232":["2026-03-27 19:11","Evening Workout",2714],"233":["2026-04-10 16:52","Afternoon Workout",5042],"234":["2026-04-12 13:40","Morning Workout",2594],"235":["2026-04-14 17:52","Afternoon Workout",726],"236":["2026-04-15 16:59","Afternoon Workout",3478],"237":["2026-04-17 18:52","Evening Workout",3144],"238":["2026-06-08 18:01","Evening Workout",1681]},"e":["Bench Press - Wide Grip (Barbell)","Chest Dip","Cable Crossover","Strict Military Press (Barbell)","Triceps Pushdown (Cable - Straight Bar)","Deadlift (Barbell)","Lat Pulldown (Cable)","Bicep Curl (Dumbbell)","Seated Row (Cable)","Leg Extension (Machine)","Calf Press on Seated Leg Press","Lying Leg Curl (Machine)","Squat (Smith Machine)","Bench Press (Barbell)","Seated Wide-Grip Row (Cable)","Shrug (Dumbbell)","Preacher Curl (Barbell)","Squat (Barbell)","Chest Fly (Dumbbell)","Bicep Curl (Barbell)","Incline Bench Press (Dumbbell)","Face Pull (Cable)","Lateral Raise (Dumbbell)","Bent Over Row (Barbell)","Pull Up","Skullcrusher (Barbell)","Chin Up","Standing Calf Raise (Barbell)","subia e pantalon","Lateral Raise (Cable)","Shrug (Barbell)","Incline Bench Press (Barbell)","tricep cable","Incline Curl (Dumbbell)","Concentration Curl (Dumbbell)","21 bíceps","pechito mancuerna","Bulgarian Split Squat","Seated Leg Curl (Machine)","Calf Press on Leg Press","Seated Leg Press (Machine)","press supino","Romanian Deadlift (Barbell)","T Bar Row","Pullover (Machine)","Overhead Press (Barbell)","Front Raise (Cable)","bicep 21","Arnold Press (Dumbbell)","Stiff Leg Deadlift (Barbell)","press banca cerrado","Squat (Bodyweight)","Triceps Extension (Cable)","horizontal jale","Hammer Curl (Dumbbell)","Bench Press - Close Grip (Barbell)","Lat Pulldown (Single Arm)","Seated Row (Machine)","face pull smart fit","Chest Press (Machine)","Chest Fly","Shoulder Press (Machine)","triceps pushdown smartfit","Knee Raise (Captain's Chair)","Plank","cross-body lat pull-around","snatch-grip RDL","straight-bar lat prayer","hammer preacher curl","overhead cable triceps extension bar","Hip Adductor (Machine)","Seated Calf Raise (Machine)","half kneeling 1 arm lat pulldown","inverse DB zottman curl","reverse pec deck","cable paused shrug in","Back Extension","Chest Dip (Assisted)","Pec Deck (Machine)","Triceps Extension (Dumbbell)","Iso-Lateral Row (Machine)","bayesian cable curl","cable triceps kickback","kneeling overhead cable curl","spider curl","cross body cable y raise","katana triceps","katana up","gatito sulek","Leg Press","seated DB french press","Shrug (Machine)","cuffed behind the back lateral raises","Romanian Deadlift (Dumbbell)","overhead triceps extensions rope","incline db stretch curl","Back Extension (Machine)","Crunch (Machine)","leg press mirador","seated leg curl mirador","abductor mirador","hip aductor mirador","Pull Up (Assisted)","Bench Press (Dumbbell)","Hip Abductor (Machine)","Aerobics","Walking","Overhead triceps extension one hand","Triceps pushdown one hand","Preacher Curl (Dumbbell)","Chin Up (Assisted)","Pendlay Row (Barbell)","low to high cable croesover","Bicep Curl (Cable)","Lat Pulldown (Machine)","Preacher Curl (Machine)","Triceps Extension (Machine)","pogo jump","Box Jump","deficit lunge to knee drive","speed skater","broad jump","Overhead Press (Dumbbell)","Hack Squat","Cycling (Indoor)","smith machine lunge","Running (Treadmill)","Articular Mobility","Hip Thrust (Bodyweight)","Side Plank","High Knee Skips","Lunge (Bodyweight)","lateral jumps","Hip Thrust (Barbell)","Standing Calf Raise (Dumbbell)","Push Up","Jump Squat","salto unipodal","Stretching","Bent Over One Arm Row (Dumbbell)","Inverted Row (Bodyweight)","Goblet Squat (Kettlebell)","elevaciones posteriores","Upright Row (Barbell)","Seated Overhead Press (Dumbbell)","Ab Wheel","Glute Kickback (Machine)","Cable Crunch","Reverse Fly (Dumbbell)","Incline Chest Press (Machine)","Standing Calf Raise (Smith Machine)"],"x":[[1,0,20.0,15,1],[1,0,30.0,14,0],[1,0,40.0,12,0],[1,0,45.0,9,0],[1,0,50.0,6,0],[1,1,0.0,10,0],[1,1,0.0,8,0],[1,1,0.0,6,0],[1,1,0.0,6,0],[1,2,10.0,10,0],[1,2,10.0,10,0],[1,2,10.0,10,0],[1,3,20.0,7,0],[1,3,20.0,6,0],[1,4,30.0,10,0],[1,4,30.0,10,0],[1,4,30.0,10,0],[2,5,78.0,4,0],[2,5,78.0,5,0],[2,6,40.0,10,0],[2,6,50.0,6,0],[2,7,10.0,6,0],[2,7,10.0,7,0],[2,8,50.0,7,0],[2,8,55.0,6,0],[2,8,55.0,6,0],[3,9,45.0,10,0],[3,9,45.0,10,0],[3,9,45.0,10,0],[3,10,40.0,10,0],[3,10,45.0,10,0],[3,10,45.0,10,0],[3,11,10.0,12,0],[3,11,10.0,12,0],[3,11,10.0,12,0],[3,12,30.0,10,0],[3,12,30.0,10,0],[3,12,42.6,10,0],[3,12,52.6,10,0],[4,13,20.0,15,1],[4,13,50.0,6,0],[4,13,50.0,6,0],[4,13,50.0,6,0],[4,13,50.0,8,0],[4,1,0.0,7,0],[4,1,0.0,7,0],[4,1,0.0,7,0],[4,1,0.0,10,0],[4,3,20.0,7,0],[4,3,20.0,7,0],[4,3,20.0,7,0],[4,4,30.0,10,0],[4,4,30.0,10,0],[4,4,30.0,10,0],[5,6,30.0,10,1],[5,6,50.0,6,0],[5,6,50.0,8,0],[5,6,50.0,8,0],[5,6,50.0,8,0],[5,14,50.0,8,0],[5,14,50.0,8,0],[5,14,50.0,8,0],[5,14,50.0,8,0],[5,7,7.5,13,0],[5,7,7.5,13,0],[5,7,7.5,10,0],[5,15,17.5,10,0],[5,15,17.5,15,0],[6,13,20.0,15,1],[6,13,50.0,10,0],[6,13,63.6,8,0],[6,13,73.6,3,0],[6,13,63.6,6,0],[6,1,0.0,8,0],[6,1,0.0,8,0],[6,1,0.0,8,0],[6,1,0.0,8,0],[6,3,24.6,5,0],[6,3,24.6,5,0],[6,3,24.6,5,0],[6,3,24.6,5,0],[6,4,30.0,15,0],[6,4,30.0,15,0],[6,4,30.0,10,0],[7,6,25.0,13,1],[7,6,55.0,5,0],[7,6,55.0,5,0],[7,6,55.0,5,0],[7,6,55.0,5,0],[7,6,55.0,5,0],[7,14,55.0,5,0],[7,14,55.0,5,0],[7,14,55.0,5,0],[7,14,55.0,5,0],[7,15,17.5,10,0],[7,15,17.5,10,0],[7,15,17.5,15,0],[7,16,15.0,15,0],[7,16,15.0,13,0],[7,16,15.0,10,0],[8,10,50.0,7,0],[8,10,55.0,6,0],[8,10,55.0,5,0],[8,10,50.0,8,0],[8,17,20.0,10,0],[8,17,29.0,7,0],[8,17,29.0,7,0],[8,17,39.0,7,0],[8,17,39.0,5,0],[9,13,20.0,15,1],[9,13,64.6,3,0],[9,13,60.0,4,0],[9,13,58.0,4,0],[9,13,53.0,5,0],[9,1,0.0,9,0],[9,1,0.0,9,0],[9,1,0.0,9,0],[9,1,0.0,9,0],[9,4,35.0,10,0],[9,4,35.0,10,0],[9,4,35.0,10,0],[9,4,35.0,10,0],[10,13,20.0,15,1],[10,13,30.0,8,0],[10,13,40.0,6,0],[10,13,50.0,6,0],[10,13,60.0,6,0],[10,13,60.0,4,0],[10,1,0.0,10,0],[10,1,0.0,10,0],[10,1,0.0,10,0],[10,1,0.0,10,0],[10,4,35.0,12,0],[10,4,35.0,12,0],[10,4,35.0,12,0],[10,4,35.0,10,0],[10,18,10.0,8,0],[10,18,10.0,8,0],[10,18,10.0,6,0],[11,6,55.0,6,0],[11,6,50.0,10,0],[11,6,55.0,6,0],[11,6,55.0,6,0],[11,14,55.0,6,0],[11,14,55.0,6,0],[11,14,55.0,6,0],[11,14,55.0,8,0],[11,19,15.0,15,0],[11,19,15.0,8,0],[11,19,19.6,6,0],[11,19,15.0,6,0],[12,9,45.0,12,0],[12,9,45.0,12,0],[12,9,45.0,12,0],[12,9,45.0,12,0],[12,11,10.0,10,0],[12,11,15.0,10,0],[12,17,20.0,12,1],[12,17,40.0,12,0],[12,17,50.0,12,0],[12,17,50.0,12,0],[12,17,60.0,12,0],[13,13,20.0,15,1],[13,13,30.0,10,0],[13,13,40.0,10,0],[13,13,50.0,8,0],[13,13,60.0,6,0],[13,1,0.0,11,0],[13,1,0.0,11,0],[13,1,0.0,11,0],[13,1,0.0,11,0],[13,4,30.0,10,0],[13,4,30.0,8,0],[13,4,30.0,10,0],[13,20,7.5,10,0],[13,20,7.5,10,0],[13,20,7.5,10,0],[14,6,50.0,10,0],[14,6,50.0,10,0],[14,6,50.0,8,0],[14,6,45.0,9,0],[14,14,50.0,8,0],[14,14,45.0,10,0],[14,14,45.0,12,0],[14,14,45.0,10,0],[14,7,7.5,10,0],[14,7,7.5,10,0],[14,7,7.5,8,0],[14,21,25.0,12,0],[14,21,25.0,12,0],[14,21,25.0,12,0],[15,13,40.0,12,1],[15,13,50.0,12,0],[15,13,50.0,12,0],[15,13,50.0,8,0],[15,13,50.0,7,0],[15,1,0.0,10,0],[15,1,0.0,7,0],[15,1,0.0,5,0],[15,4,30.0,12,0],[15,4,30.0,10,0],[15,4,30.0,10,0],[15,22,5.0,12,0],[15,22,5.0,12,0],[15,22,5.0,12,0],[16,5,28.6,10,1],[16,5,60.35,10,0],[16,5,83.03,6,0],[16,5,87.6,6,0],[16,6,40.0,8,0],[16,14,50.0,10,0],[16,14,55.0,8,0],[16,14,60.0,6,0],[16,19,10.0,10,0],[16,19,7.5,10,0],[16,19,5.0,10,0],[17,9,45.0,12,0],[17,9,45.0,10,0],[17,9,20.0,11,0],[17,17,20.0,10,0],[17,17,40.0,12,0],[17,17,50.0,12,0],[17,17,49.0,14,0],[17,17,59.0,8,0],[18,9,20.0,12,0],[18,9,20.0,10,0],[18,17,15.0,15,1],[18,17,51.7,9,0],[18,17,60.8,5,0],[18,17,74.4,5,0],[18,17,92.5,3,0],[18,17,83.5,5,0],[18,17,65.0,10,0],[18,17,51.7,10,0],[19,14,40.0,10,0],[19,14,45.0,10,0],[19,14,40.0,10,0],[19,23,20.0,15,1],[19,23,51.7,5,0],[19,23,51.7,5,0],[19,23,51.7,5,0],[19,23,51.7,5,0],[19,23,51.7,5,0],[19,23,42.0,15,2],[19,23,20.0,15,0],[19,24,0.0,5,0],[19,24,0.0,3,0],[19,25,10.0,10,0],[19,25,10.0,10,0],[20,5,20.0,15,1],[20,5,60.8,8,1],[20,5,83.5,5,0],[20,5,83.5,5,0],[20,5,83.5,5,0],[20,5,83.5,5,0],[20,5,83.5,5,0],[21,13,20.0,16,1],[21,13,40.0,8,1],[21,13,60.8,5,0],[21,13,60.8,5,0],[21,13,60.8,5,0],[21,13,60.8,5,0],[21,13,60.8,5,0],[21,18,7.5,12,0],[21,18,7.5,12,0],[21,18,7.5,12,0],[21,26,0.0,5,0],[21,26,0.0,5,0],[21,26,0.0,5,0],[22,9,20.0,14,0],[22,9,25.0,9,0],[22,17,20.0,12,1],[22,17,51.0,8,0],[22,17,82.6,5,0],[22,17,82.6,5,0],[22,17,82.6,5,0],[22,17,82.6,5,0],[22,27,70.0,12,0],[22,27,70.0,10,0],[23,23,20.0,15,1],[23,23,33.0,8,1],[23,23,60.0,5,0],[23,23,60.0,5,0],[23,23,60.0,5,0],[23,23,60.0,5,0],[23,23,65.0,5,0],[23,23,51.0,8,2],[23,23,20.0,12,2],[23,24,0.0,8,0],[23,24,0.0,4,0],[23,24,0.0,3,0],[23,4,25.0,12,0],[23,4,30.0,12,0],[23,4,30.0,12,0],[24,5,61.0,8,1],[24,5,70.0,5,0],[24,5,70.0,5,0],[24,5,70.0,5,0],[24,5,70.0,5,0],[24,5,97.0,5,0],[25,3,20.0,15,1],[25,3,30.0,5,0],[25,3,30.0,5,0],[25,3,30.0,5,0],[25,3,30.0,5,0],[25,3,30.0,5,0],[25,22,5.0,12,0],[25,22,5.0,12,0],[25,22,5.0,12,0],[25,15,17.5,10,0],[25,15,17.5,10,0],[25,15,17.5,15,0],[25,28,7.5,10,0],[25,28,7.5,10,0],[25,28,7.5,10,0],[26,13,20.0,15,1],[26,13,60.0,5,0],[26,13,65.0,5,0],[26,13,65.0,5,0],[26,13,65.0,5,0],[26,13,65.0,5,0],[26,26,0.0,8,0],[26,26,0.0,4,0],[26,26,0.0,2,0],[27,9,25.0,9,0],[27,9,25.0,9,0],[27,9,25.0,9,0],[27,17,15.0,15,1],[27,17,55.8,8,1],[27,17,75.8,5,0],[27,17,85.8,5,0],[27,17,85.8,5,0],[27,17,85.8,5,0],[27,17,85.8,3,0],[28,23,20.0,15,1],[28,23,65.0,5,0],[28,23,65.0,5,0],[28,23,65.0,5,0],[28,23,65.0,5,0],[28,23,65.0,6,0],[28,24,0.0,8,0],[28,24,0.0,4,0],[28,24,0.0,3,0],[28,25,10.0,13,0],[28,25,10.0,12,0],[28,25,10.0,10,0],[28,19,20.0,10,0],[28,19,20.0,10,0],[29,5,60.8,7,1],[29,5,83.5,5,0],[29,5,97.0,5,0],[29,5,97.0,5,0],[29,5,97.0,5,0],[29,5,97.0,5,0],[30,3,20.0,15,1],[30,3,30.0,7,0],[30,3,32.2,5,0],[30,3,35.0,5,0],[30,3,35.0,5,0],[30,3,37.2,5,0],[30,29,5.0,20,0],[30,29,5.0,15,0],[30,30,60.0,7,0],[30,30,60.0,5,0],[30,21,35.0,7,0],[30,21,35.0,7,0],[31,13,60.0,8,0],[31,13,70.0,1,0],[31,13,65.0,5,0],[31,13,65.0,5,0],[31,13,65.0,4,0],[31,13,60.0,4,0],[31,13,60.0,4,0],[31,18,8.0,12,0],[31,18,8.0,12,0],[31,18,8.0,12,0],[31,31,40.0,3,0],[31,32,5.0,10,0],[31,32,5.0,10,0],[31,32,5.0,10,0],[32,9,25.0,12,0],[32,9,30.0,7,0],[32,9,30.0,6,0],[32,17,42.0,10,1],[32,17,60.0,8,1],[32,17,80.0,5,0],[32,17,83.5,5,0],[32,17,83.5,5,0],[32,17,83.5,5,0],[32,17,83.5,5,0],[33,14,50.0,10,0],[33,14,55.0,6,0],[33,14,55.0,7,0],[33,23,20.0,15,1],[33,23,42.0,8,1],[33,23,60.8,5,0],[33,23,65.4,5,0],[33,23,65.5,5,0],[33,23,65.5,5,0],[33,23,65.5,5,0],[33,24,0.0,7,0],[33,24,0.0,5,0],[33,24,0.0,4,0],[33,32,20.0,18,0],[33,32,20.0,8,0],[33,32,15.0,10,0],[34,5,55.0,8,1],[34,5,78.5,6,1],[34,5,88.5,5,0],[34,5,88.5,5,0],[34,5,88.5,5,0],[34,5,88.5,5,0],[34,5,88.5,5,0],[34,27,50.0,12,0],[34,27,50.0,12,0],[34,27,50.0,12,0],[35,3,30.0,8,0],[35,3,30.0,8,0],[35,3,30.0,8,0],[35,3,30.0,6,0],[35,3,29.0,7,0],[35,29,5.0,14,0],[35,29,5.0,15,0],[35,29,5.0,12,0],[35,19,20.0,10,1],[35,19,24.6,8,0],[35,19,24.6,7,0],[35,19,24.6,6,0],[35,19,24.6,5,0],[35,7,7.5,15,0],[35,7,12.0,5,0],[35,7,10.0,6,0],[35,33,7.5,5,0],[35,33,7.5,5,0],[35,33,7.5,5,0],[35,25,20.0,11,0],[35,25,20.0,8,0],[35,25,20.0,6,0],[36,13,20.0,15,1],[36,13,60.8,5,0],[36,13,68.3,5,0],[36,13,65.8,5,0],[36,13,65.8,5,0],[36,13,63.3,5,0],[36,31,20.0,10,1],[36,31,29.0,10,0],[36,31,34.0,5,0],[36,31,29.0,8,0],[36,19,20.0,8,0],[36,19,24.6,6,0],[36,19,24.6,4,0],[36,19,20.0,1,2],[36,19,24.6,5,0],[37,9,30.0,9,0],[37,9,30.0,7,0],[37,17,42.6,10,1],[37,17,60.8,8,1],[37,17,88.5,5,0],[37,17,88.5,5,0],[37,17,88.5,3,0],[37,17,88.5,5,0],[37,17,88.5,5,0],[38,23,20.0,18,1],[38,23,60.8,5,0],[38,23,68.0,5,0],[38,23,60.8,5,0],[38,23,60.8,7,0],[38,23,60.8,5,0],[38,24,0.0,5,0],[39,11,15.0,8,0],[39,11,15.0,10,0],[39,11,15.0,10,0],[39,11,15.0,10,0],[39,27,52.5,12,0],[39,27,52.5,12,0],[39,27,52.5,10,0],[39,27,52.5,10,0],[39,4,25.0,15,0],[39,4,30.0,12,0],[39,4,30.0,12,0],[39,4,25.0,12,0],[40,3,15.0,25,0],[40,3,15.0,25,0],[40,3,15.0,30,0],[40,3,15.0,30,0],[40,3,15.0,40,0],[40,22,4.0,15,0],[40,22,4.0,15,0],[40,22,4.0,15,0],[40,22,4.0,15,0],[40,21,5.0,20,0],[40,21,5.0,20,0],[40,21,5.0,20,0],[40,26,0.0,4,0],[40,26,0.0,3,0],[40,26,0.0,1,0],[41,13,20.0,15,1],[41,13,40.0,15,0],[41,13,40.0,15,0],[41,13,40.0,13,0],[41,34,7.5,12,0],[41,34,7.5,12,0],[41,35,15.0,21,0],[41,35,15.0,7,0],[41,20,7.5,12,0],[41,20,7.5,12,0],[41,20,7.5,12,0],[41,36,7.5,12,0],[41,36,7.5,12,0],[41,36,7.5,12,0],[42,9,35.0,12,0],[42,9,30.0,12,0],[42,17,20.0,12,1],[42,17,60.0,12,0],[42,17,60.0,12,0],[42,17,60.0,12,0],[42,37,10.0,10,0],[42,37,10.0,12,0],[43,5,20.0,12,1],[43,5,60.0,12,0],[43,5,60.0,12,0],[43,5,60.0,12,0],[43,38,25.0,12,0],[43,38,30.0,12,0],[43,38,30.0,12,0],[43,39,30.0,12,0],[43,39,30.0,12,0],[43,40,35.0,12,0],[43,40,45.0,12,0],[43,40,40.0,12,0],[44,17,35.0,12,1],[44,17,75.0,5,1],[44,17,95.0,1,0],[44,17,105.0,1,0],[44,17,110.0,1,0],[44,17,115.0,1,0],[45,13,20.0,13,1],[45,13,40.0,5,0],[45,13,60.0,2,0],[45,13,75.0,1,0],[46,5,30.0,15,0],[46,5,60.0,10,0],[46,5,92.5,1,0],[46,5,101.6,1,0],[46,5,111.6,1,0],[46,5,124.3,1,0],[46,5,134.3,1,0],[46,5,144.3,1,0],[47,13,20.0,15,1],[47,13,56.0,8,0],[47,13,56.0,8,0],[47,13,56.0,8,0],[47,13,56.0,8,0],[47,41,33.6,8,0],[47,41,20.0,10,0],[47,41,30.0,10,0],[47,20,10.0,12,0],[47,20,10.0,11,0],[47,20,10.0,11,0],[47,19,20.0,10,0],[47,19,20.0,10,0],[48,17,20.0,12,1],[48,17,60.0,8,1],[48,17,90.8,6,0],[48,17,90.8,6,0],[48,17,90.8,6,0],[48,17,90.8,6,0],[48,42,60.0,8,0],[48,42,60.0,8,0],[48,42,60.0,8,0],[48,37,15.0,8,0],[48,37,15.0,6,0],[49,23,15.0,12,1],[49,23,37.6,10,1],[49,23,55.8,8,0],[49,23,55.8,7,0],[49,23,55.8,7,0],[49,23,55.8,7,0],[49,43,30.0,15,0],[49,43,50.0,10,0],[49,43,50.0,10,0],[49,44,30.0,15,0],[49,44,30.0,10,0],[50,5,15.0,12,1],[50,5,60.0,8,1],[50,5,116.6,3,0],[50,5,106.6,5,0],[50,5,96.6,7,0],[50,5,106.6,6,0],[50,11,15.0,10,0],[50,11,15.0,10,0],[50,10,50.0,10,0],[51,13,15.0,20,1],[51,13,59.0,8,0],[51,13,59.0,8,0],[51,13,60.8,7,0],[51,13,60.8,3,0],[51,41,31.0,10,0],[51,41,33.0,10,0],[51,41,33.0,10,0],[51,26,0.0,10,0],[51,26,0.0,8,0],[51,26,0.0,6,0],[52,17,20.0,15,1],[52,17,92.5,5,0],[52,17,92.5,5,0],[52,17,92.5,5,0],[52,17,92.5,5,0],[52,42,60.8,10,0],[52,42,60.8,10,0],[53,23,20.0,15,1],[53,23,60.8,8,0],[53,23,60.8,8,0],[53,23,60.8,10,0],[53,23,60.8,8,0],[53,24,0.0,8,0],[53,24,0.0,6,0],[53,24,0.0,4,0],[54,5,20.0,10,1],[54,5,60.8,8,1],[54,5,100.0,5,0],[54,5,120.0,5,0],[54,5,120.0,4,0],[54,5,120.0,3,0],[55,45,33.6,13,0],[55,45,33.6,8,0],[55,45,33.6,6,0],[55,46,25.0,10,0],[55,46,20.0,8,0],[55,46,15.0,6,0],[55,21,50.0,18,0],[56,13,20.0,18,1],[56,13,60.8,7,0],[56,13,60.8,5,0],[56,13,51.75,6,0],[56,13,51.75,5,0],[56,41,22.6796185,6,0],[56,41,22.6796185,5,0],[56,41,22.6796185,5,0],[56,19,9.071847400000001,10,1],[56,19,9.071847400000001,10,0],[56,19,9.071847400000001,10,0],[56,18,10.0,5,0],[56,18,10.0,4,0],[56,18,10.0,3,0],[56,47,7.5,21,0],[56,47,5.0,21,0],[56,48,10.0,15,0],[57,17,60.0,10,1],[57,17,95.8,6,0],[57,17,95.8,6,0],[57,17,95.8,5,0],[57,17,95.8,3,0],[57,49,31.751465900000003,8,0],[57,49,31.751465900000003,8,0],[57,49,31.751465900000003,8,0],[57,9,35.0,9,0],[57,9,35.0,9,0],[58,23,20.0,10,1],[58,23,55.8,10,0],[58,23,60.0,10,0],[58,23,60.0,10,0],[58,23,60.0,8,0],[58,43,42.0,20,0],[58,43,52.0,10,0],[58,43,52.0,8,0],[58,25,10.0,10,0],[58,25,10.0,10,0],[58,4,25.0,12,0],[58,4,30.0,10,0],[59,23,40.0,12,0],[59,23,50.0,7,0],[59,23,50.0,7,0],[59,23,50.0,5,0],[59,23,50.0,6,0],[59,6,50.0,6,0],[59,6,45.0,5,0],[59,6,40.0,5,0],[59,6,40.0,5,0],[59,14,35.0,7,0],[59,14,35.0,8,0],[59,14,35.0,8,0],[59,14,35.0,11,0],[59,4,25.0,15,0],[59,4,30.0,9,0],[59,4,30.0,7,0],[59,4,30.0,7,0],[60,13,20.0,15,1],[60,13,42.6,12,0],[60,13,56.2,8,0],[60,13,56.2,5,0],[60,13,60.8,3,0],[60,20,15.0,8,0],[60,20,15.0,5,0],[60,20,15.0,3,0],[60,18,7.5,8,0],[60,18,7.5,7,0],[60,18,7.5,5,0],[60,19,20.0,9,0],[60,19,20.0,5,0],[60,7,7.5,4,0],[61,17,20.0,10,1],[61,17,51.7,10,1],[61,17,74.4,10,0],[61,17,84.4,6,0],[61,17,84.4,5,0],[61,17,84.4,6,0],[61,9,25.0,12,0],[61,9,25.0,6,0],[61,9,25.0,3,0],[62,23,42.6,8,0],[62,23,42.6,8,0],[62,23,51.7,5,0],[62,23,42.6,6,0],[62,6,45.0,7,0],[62,6,45.0,6,0],[62,6,45.0,5,0],[62,50,42.6,10,0],[62,50,42.6,6,0],[62,50,42.6,3,0],[62,14,40.0,12,0],[62,14,40.0,12,0],[62,14,40.0,8,0],[63,5,40.0,10,0],[63,5,80.0,8,0],[63,5,105.0,3,0],[63,5,100.0,5,0],[63,5,100.0,4,0],[63,11,10.0,20,0],[63,11,15.0,10,0],[63,11,15.0,5,0],[63,51,40.0,12,0],[63,51,40.0,12,0],[63,51,40.0,8,0],[64,21,40.0,10,0],[64,21,45.0,12,0],[64,21,50.0,9,0],[64,21,50.0,8,0],[64,29,10.0,6,0],[64,29,5.0,5,2],[64,29,10.0,5,0],[64,29,5.0,5,2],[64,29,10.0,6,0],[64,29,5.0,6,2],[64,3,30.0,5,0],[64,3,30.0,4,0],[64,3,30.0,3,0],[64,3,30.0,4,0],[64,13,44.8,8,0],[64,13,44.8,6,0],[64,13,44.8,5,0],[65,13,20.0,12,1],[65,13,42.6,12,0],[65,13,51.7,9,0],[65,13,51.7,6,0],[65,13,61.7,2,0],[65,20,15.0,10,0],[65,20,15.0,7,0],[65,20,15.0,6,0],[65,18,10.0,7,0],[65,18,10.0,6,0],[65,18,10.0,6,0],[65,19,15.0,17,0],[65,19,20.0,5,0],[65,19,20.0,3,0],[66,17,20.0,12,1],[66,17,60.8,6,1],[66,17,74.4,8,0],[66,17,86.6,7,0],[66,17,86.6,5,0],[66,17,86.6,7,0],[66,9,25.0,12,0],[66,9,25.0,6,0],[66,9,25.0,3,0],[67,23,42.6,10,0],[67,23,51.7,10,0],[67,23,51.7,10,0],[67,23,54.7,9,0],[67,6,45.0,8,0],[67,6,45.0,8,0],[67,6,45.0,8,0],[67,14,45.0,10,0],[67,14,50.0,7,0],[67,14,45.0,8,0],[67,32,20.0,12,0],[67,32,20.0,6,0],[67,32,20.0,5,0],[67,52,10.0,12,0],[67,52,10.0,12,0],[67,52,10.0,12,0],[68,5,20.0,8,1],[68,5,60.0,8,0],[68,5,100.0,10,0],[68,5,105.0,5,0],[68,5,105.0,4,0],[68,5,105.0,3,0],[68,11,15.0,11,0],[68,11,15.0,5,0],[68,11,15.0,4,0],[68,51,40.0,10,0],[68,51,40.0,12,0],[68,51,42.0,10,0],[69,23,55.8,10,0],[69,23,60.0,8,0],[69,23,60.0,7,0],[69,23,60.0,6,0],[69,6,45.0,10,0],[69,6,45.0,10,0],[69,6,45.0,8,0],[69,53,15.0,12,0],[69,53,20.0,12,0],[69,53,20.0,10,0],[69,14,45.0,8,2],[69,50,37.0,10,0],[70,13,20.0,10,1],[70,13,40.0,8,1],[70,13,50.0,10,0],[70,13,54.6,8,0],[70,13,54.6,3,0],[70,13,50.0,3,0],[70,20,75.0,8,0],[70,20,15.0,6,0],[70,20,15.0,8,0],[70,18,7.5,12,0],[70,18,7.5,12,0],[70,18,7.5,10,0],[70,19,20.0,10,0],[70,19,20.0,8,0],[70,19,20.0,6,0],[70,7,7.5,8,0],[70,7,5.0,8,0],[70,7,7.5,8,0],[70,7,5.0,8,0],[71,17,60.0,8,1],[71,17,83.5,8,0],[71,17,83.5,8,0],[71,17,83.5,8,0],[71,17,83.5,5,0],[72,17,60.0,8,1],[72,17,70.0,8,1],[72,17,80.0,8,0],[72,17,90.0,5,0],[72,17,84.6,8,0],[72,17,84.4,6,0],[72,37,15.0,8,0],[72,37,15.0,8,0],[72,37,15.0,6,0],[72,9,25.0,10,0],[72,9,25.0,7,0],[72,9,25.0,7,0],[73,13,20.0,15,1],[73,13,40.0,8,1],[73,13,60.0,8,0],[73,13,60.0,8,0],[73,13,60.0,6,0],[73,13,60.0,4,0],[73,20,15.0,8,0],[73,20,15.0,8,0],[73,20,15.0,6,0],[73,18,10.0,9,0],[73,18,10.0,5,0],[73,18,10.0,5,0],[73,16,15.0,9,0],[73,16,15.0,4,0],[73,16,12.0,5,0],[73,54,7.5,10,0],[73,54,7.5,9,0],[73,54,7.5,8,0],[73,33,7.5,10,0],[74,23,15.0,8,1],[74,23,37.5,10,1],[74,23,46.7,8,0],[74,23,46.7,8,0],[74,23,46.7,7,0],[74,23,46.7,6,0],[74,6,40.0,10,0],[74,6,40.0,8,0],[74,6,40.0,7,0],[74,14,50.0,4,2],[74,14,45.0,6,0],[74,14,40.0,7,0],[74,52,10.0,15,0],[74,52,15.0,7,0],[74,52,25.0,6,0],[74,4,30.0,11,0],[74,4,30.0,6,0],[74,32,10.0,10,0],[75,13,20.0,10,1],[75,13,40.0,8,1],[75,13,62.0,7,0],[75,13,62.0,5,0],[75,13,62.0,4,0],[75,13,62.0,3,0],[75,20,15.0,7,0],[75,20,15.0,7,0],[75,20,15.0,5,0],[75,18,10.0,7,0],[75,18,10.0,5,0],[76,13,40.0,10,1],[76,13,54.6,10,0],[76,13,54.6,10,0],[76,13,54.6,6,0],[76,13,54.6,4,0],[76,20,15.0,8,0],[76,20,15.0,9,0],[76,20,15.0,6,0],[76,20,15.0,8,0],[76,18,10.0,9,0],[76,18,7.5,10,0],[76,18,7.5,8,0],[76,18,7.5,8,0],[77,3,30.0,10,0],[77,3,30.0,10,0],[77,3,30.0,10,0],[77,3,30.0,7,0],[77,29,5.0,10,0],[77,29,5.0,10,0],[77,29,5.0,10,0],[77,29,5.0,10,0],[77,21,40.0,10,0],[77,21,40.0,10,0],[77,21,40.0,10,0],[77,21,40.0,10,0],[78,19,20.0,10,0],[78,19,20.0,10,0],[78,19,20.0,10,0],[78,19,20.0,5,0],[78,25,20.0,5,0],[78,32,20.0,10,0],[78,32,20.0,8,0],[78,32,20.0,6,0],[78,16,15.0,18,0],[78,55,42.6,10,0],[78,55,42.6,6,0],[78,33,7.5,6,0],[78,33,7.5,4,0],[79,13,20.0,10,1],[79,13,40.0,8,1],[79,13,65.4,8,0],[79,13,65.4,7,0],[79,13,65.4,4,0],[79,13,60.0,5,0],[79,20,17.5,10,0],[79,20,17.5,8,0],[79,20,17.5,5,0],[79,3,25.0,7,0],[79,3,25.0,6,0],[79,3,25.0,4,0],[79,22,5.0,18,0],[79,22,5.0,18,0],[79,22,5.0,18,0],[79,4,40.0,12,0],[79,4,35.0,12,0],[79,4,35.0,10,0],[79,4,35.0,10,0],[80,17,60.0,8,1],[80,17,80.0,4,1],[80,17,100.0,8,0],[80,17,100.0,7,0],[80,17,100.0,6,0],[80,17,100.0,4,0],[80,9,35.0,10,0],[80,9,35.0,8,0],[80,9,35.0,6,0],[80,37,17.5,8,0],[80,37,17.5,5,0],[80,37,17.5,4,0],[81,23,50.0,8,0],[81,23,50.0,8,0],[81,23,50.0,8,0],[81,6,4.0,12,1],[81,6,40.0,12,0],[81,6,45.0,12,0],[81,6,45.0,10,0],[81,53,25.0,8,0],[81,53,20.0,10,0],[81,53,20.0,10,0],[81,21,50.0,10,0],[81,21,50.0,10,0],[81,21,50.0,8,0],[81,19,24.6,4,0],[81,19,20.0,6,0],[81,33,7.5,7,0],[82,56,12.0,15,0],[82,56,15.0,15,0],[82,56,20.0,15,0],[82,24,0.0,4,0],[82,57,45.0,15,0],[82,57,55.0,12,0],[82,57,55.0,10,0],[82,58,17.0,15,0],[82,58,20.0,12,0],[82,58,20.0,10,0],[83,59,50.0,6,0],[83,59,42.5,11,0],[83,59,42.5,6,0],[83,59,35.0,3,2],[83,60,42.5,10,0],[83,60,42.5,10,0],[83,60,42.5,10,0],[83,61,35.0,6,0],[83,61,27.5,5,0],[83,61,20.0,7,0],[83,22,6.0,12,0],[83,22,6.0,11,0],[83,22,6.0,10,0],[83,62,17.5,17,0],[83,62,17.5,16,0],[83,62,17.5,13,0],[83,7,14.0,5,0],[83,7,12.0,8,0],[83,7,12.0,6,0],[83,63,0.0,10,0],[83,63,0.0,10,2],[83,63,0.0,10,0],[83,63,0.0,12,2],[83,63,0.0,10,0],[83,63,0.0,12,2],[84,13,20.0,10,1],[84,13,40.0,5,1],[84,13,64.6,7,0],[84,13,64.6,5,0],[84,13,60.0,5,0],[84,13,60.0,6,0],[84,20,17.5,10,0],[84,20,17.5,7,0],[84,20,17.5,7,0],[84,4,30.0,20,0],[84,4,35.0,10,0],[84,4,35.0,8,0],[84,29,5.0,10,0],[84,29,10.0,5,0],[84,29,5.0,10,0],[85,65,1.0,1,1],[85,65,1.0,1,0],[85,65,1.0,1,0],[85,65,1.0,1,0],[85,66,1.0,1,1],[85,66,1.0,1,1],[85,66,1.0,1,0],[85,66,1.0,1,0],[85,57,1.0,1,1],[85,57,1.0,1,0],[85,57,1.0,1,0],[85,57,1.0,1,0],[85,67,1.0,1,1],[85,67,1.0,1,0],[85,67,1.0,1,0],[85,67,1.0,1,0],[85,68,1.0,1,1],[85,68,1.0,1,0],[85,68,1.0,1,0],[85,68,1.0,1,0],[85,58,1.0,1,1],[85,58,1.0,1,0],[85,58,1.0,1,0],[85,58,1.0,1,0],[86,65,7.5,10,1],[86,65,17.5,18,0],[86,65,21.25,10,0],[86,65,21.5,11,0],[86,57,35.0,10,1],[86,57,57.5,9,0],[86,57,57.5,8,0],[86,57,57.5,6,0],[86,67,17.5,6,1],[86,67,15.0,10,0],[86,67,12.5,10,0],[86,67,12.5,10,0],[86,68,5.0,15,1],[86,68,8.0,7,0],[86,68,7.0,7,0],[86,68,6.0,8,0],[86,58,17.5,15,0],[86,58,21.25,10,0],[86,58,21.25,10,0],[87,29,2.5,10,1],[87,29,5.0,10,0],[87,29,5.0,8,0],[87,29,2.5,12,0],[87,20,12.0,10,1],[87,20,14.0,5,1],[87,20,18.0,10,0],[87,20,18.0,10,0],[87,20,18.0,9,0],[87,20,18.0,8,0],[87,60,35.0,15,0],[87,60,35.0,14,0],[87,60,35.0,10,0],[87,69,10.0,8,1],[87,69,17.5,8,0],[87,69,21.25,5,0],[87,69,17.5,4,0],[87,4,21.25,5,0],[87,4,17.5,3,2],[87,4,12.0,2,2],[87,4,17.5,7,0],[87,4,15.0,2,2],[87,4,12.0,3,2],[87,63,0.0,12,0],[87,63,0.0,10,0],[87,63,0.0,8,0],[88,38,20.0,10,1],[88,38,27.0,10,1],[88,38,42.5,10,0],[88,38,42.5,10,0],[88,38,42.5,10,0],[88,70,27.5,10,1],[88,70,57.5,23,1],[88,70,95.0,7,0],[88,70,87.5,12,0],[88,70,87.5,10,0],[88,17,60.0,8,1],[88,17,80.0,4,1],[88,17,100.0,2,1],[88,17,110.0,4,0],[88,17,95.0,6,0],[88,17,80.0,8,0],[88,9,65.0,10,0],[88,9,65.0,8,0],[88,9,65.0,7,0],[88,71,20.0,10,0],[88,71,20.0,9,0],[88,71,20.0,8,0],[89,67,10.0,10,1],[89,67,15.0,12,0],[89,67,15.0,12,0],[89,67,15.0,10,0],[89,72,21.25,10,0],[89,72,21.25,10,0],[89,33,7.0,15,0],[89,33,8.0,10,0],[89,33,8.0,8,0],[89,25,15.0,10,0],[89,25,15.0,10,0],[89,25,15.0,10,0],[89,16,10.0,24,0],[89,16,15.0,8,0],[89,32,7.5,15,0],[89,32,7.5,10,0],[90,57,35.0,10,1],[90,57,57.5,12,0],[90,57,57.5,10,0],[90,57,57.5,8,0],[90,6,47.0,8,0],[90,6,40.0,10,0],[90,6,40.0,9,0],[90,73,10.0,12,0],[90,73,10.0,10,0],[90,73,10.0,7,0],[90,74,27.5,15,0],[90,74,35.0,7,0],[90,74,27.5,9,0],[90,75,34.0,12,0],[90,75,34.0,12,0],[90,75,34.0,12,0],[90,76,0.0,16,0],[90,76,0.0,10,0],[91,61,10.0,10,1],[91,61,15.0,9,1],[91,61,30.0,11,0],[91,61,30.0,11,2],[91,61,30.0,11,2],[91,22,6.0,15,0],[91,22,7.0,15,0],[91,22,7.0,13,0],[91,77,0.0,8,0],[91,77,0.0,8,0],[91,77,0.0,8,0],[91,78,20.0,20,0],[91,78,30.0,11,0],[91,78,25.0,15,0],[91,79,16.0,10,0],[91,25,17.5,10,0],[91,25,175.0,8,0],[92,67,15.0,13,0],[92,67,15.0,13,0],[92,67,15.0,13,0],[92,72,21.25,12,0],[92,72,21.25,12,0],[92,80,35.0,12,1],[92,80,42.5,15,1],[92,4,17.5,15,0],[92,4,17.5,12,0],[92,4,17.5,11,0],[92,81,3.75,15,1],[92,81,6.25,15,0],[92,81,6.25,14,0],[92,81,6.25,10,0],[92,82,8.75,15,0],[92,82,8.75,12,0],[92,83,6.25,15,0],[92,83,8.75,10,0],[93,65,15.0,15,1],[93,65,25.0,15,0],[93,65,28.75,10,0],[93,65,28.75,10,0],[93,68,7.0,12,0],[93,68,7.0,10,0],[93,68,7.0,8,0],[93,58,21.25,10,0],[93,58,21.25,10,0],[93,58,21.25,10,0],[93,6,61.0,9,0],[93,6,61.0,5,0],[93,6,61.0,4,0],[93,23,60.0,8,0],[93,23,60.0,7,0],[93,23,60.0,6,0],[94,60,42.5,15,0],[94,60,42.5,12,0],[94,60,42.5,8,0],[94,69,21.25,10,2],[94,69,21.25,6,2],[94,69,15.0,8,2],[94,4,17.5,8,2],[94,4,15.0,8,2],[94,4,12.5,8,2],[94,22,3.0,10,1],[94,22,3.0,10,1],[94,22,5.0,12,0],[94,22,5.0,12,0],[94,22,5.0,8,0],[94,22,6.0,7,0],[94,13,40.0,10,1],[94,13,60.0,8,0],[94,13,60.0,7,0],[94,13,60.0,6,0],[94,13,50.0,8,0],[95,38,27.5,10,1],[95,38,42.5,11,0],[95,38,42.5,11,0],[95,38,42.5,11,0],[95,17,20.0,10,1],[95,17,40.0,8,1],[95,17,60.0,6,1],[95,17,80.0,4,1],[95,17,100.0,8,1],[95,17,110.0,4,0],[95,17,100.0,6,0],[95,17,80.0,12,0],[95,9,65.0,12,0],[95,9,65.0,11,0],[95,9,65.0,10,0],[95,70,50.0,10,1],[95,70,95.0,12,0],[95,70,95.0,10,0],[95,70,95.0,6,0],[96,67,10.0,10,1],[96,67,12.5,8,1],[96,67,15.0,20,0],[96,67,17.5,12,0],[96,67,17.5,12,0],[96,72,21.25,14,0],[96,72,21.25,12,0],[96,25,17.5,18,0],[96,25,20.0,11,0],[96,25,20.0,9,0],[96,32,15.0,12,0],[96,32,15.0,10,0],[96,81,6.25,18,0],[96,81,8.75,12,0],[96,81,8.75,11,0],[96,84,10.0,12,0],[96,84,10.0,10,0],[97,57,27.5,10,1],[97,57,65.0,10,0],[97,57,65.0,10,0],[97,57,65.0,10,0],[97,6,61.0,9,0],[97,6,61.0,5,0],[97,6,54.0,7,0],[97,73,12.0,8,0],[97,73,10.0,10,0],[97,73,10.0,10,0],[97,74,35.0,15,0],[97,74,35.0,12,0],[97,74,35.0,10,0],[97,75,36.0,15,0],[97,75,36.0,15,0],[97,75,36.0,15,0],[98,61,12.5,10,1],[98,61,20.0,12,0],[98,61,20.0,8,2],[98,61,20.0,7,2],[98,85,1.25,15,1],[98,85,3.75,10,0],[98,85,1.25,11,0],[98,85,1.25,10,0],[98,77,0.0,8,0],[98,77,12.0,8,0],[98,77,12.0,8,0],[98,78,35.0,15,0],[98,78,35.0,20,0],[98,78,35.0,15,0],[98,86,3.75,12,1],[98,86,8.75,8,0],[98,86,6.25,14,0],[98,86,6.25,12,0],[99,17,60.0,6,1],[99,17,80.0,4,1],[99,17,100.0,2,1],[99,17,110.0,5,0],[99,17,100.0,7,0],[99,17,90.0,8,0],[99,9,65.0,15,0],[99,9,65.0,12,0],[99,9,65.0,9,0],[99,70,95.0,13,0],[99,70,95.0,9,0],[99,70,87.5,8,0],[99,11,20.0,15,0],[99,11,27.5,12,0],[99,11,35.0,12,0],[100,67,17.5,15,0],[100,67,17.5,14,0],[100,67,17.5,13,0],[100,72,10.0,10,1],[100,72,21.25,15,0],[100,72,21.25,14,0],[100,4,21.25,15,0],[100,4,21.25,16,0],[100,4,21.25,12,0],[100,81,7.5,12,0],[100,81,7.5,10,0],[100,83,7.5,15,0],[100,83,10.0,10,0],[100,83,10.0,8,0],[100,87,10.0,9,0],[100,87,10.0,7,0],[100,88,15.0,15,0],[100,88,15.0,14,0],[100,88,15.0,13,0],[101,65,13.75,10,1],[101,65,28.75,10,0],[101,65,28.75,10,0],[101,65,28.75,10,0],[101,57,65.0,11,0],[101,57,65.0,9,0],[101,57,65.0,8,0],[101,67,13.75,8,1],[101,67,18.75,13,0],[101,67,21.25,11,0],[101,67,21.25,11,0],[101,68,8.0,13,0],[101,68,8.0,7,0],[101,68,8.0,11,0],[101,58,21.25,14,0],[101,58,15.0,15,0],[101,58,21.25,16,0],[101,88,21.25,19,0],[102,20,20.0,8,0],[102,20,20.0,8,0],[102,20,20.0,8,0],[102,20,20.0,8,0],[102,60,50.0,12,0],[102,60,42.5,10,0],[102,60,42.5,10,0],[102,69,21.25,11,0],[102,69,15.0,7,2],[102,69,10.0,6,2],[102,69,21.25,8,0],[102,69,15.0,4,2],[102,69,10.0,4,2],[102,69,21.25,5,0],[102,69,15.0,3,2],[102,69,10.0,3,2],[102,4,21.25,11,0],[102,4,15.0,5,2],[102,4,10.0,10,2],[102,4,17.5,10,0],[102,4,12.5,6,2],[102,4,7.5,15,2],[102,22,3.0,8,1],[102,22,7.0,15,0],[102,22,7.0,11,0],[102,22,7.0,8,0],[102,22,7.0,5,0],[102,22,7.0,3,0],[103,38,20.0,12,1],[103,38,35.0,6,1],[103,38,50.0,12,0],[103,38,57.5,10,0],[103,38,57.5,10,0],[103,9,72.5,15,0],[103,9,77.5,15,0],[103,9,77.5,10,0],[103,70,100.0,15,0],[103,70,100.0,12,0],[103,70,100.0,9,0],[103,89,40.0,10,1],[103,89,80.0,9,1],[103,89,120.0,6,1],[103,89,160.0,4,1],[103,89,200.0,8,0],[103,89,220.0,8,0],[103,89,220.0,8,0],[104,67,12.5,10,1],[104,67,17.5,7,1],[104,67,21.25,15,0],[104,67,21.25,15,0],[104,67,21.25,12,0],[104,72,25.0,12,0],[104,72,25.0,12,0],[104,81,8.75,12,0],[104,81,8.75,10,0],[104,81,8.75,8,0],[104,82,6.25,11,0],[104,82,6.25,10,0],[104,90,20.0,12,0],[104,90,22.0,9,0],[104,90,22.0,7,0],[104,16,17.5,12,0],[104,16,17.5,9,0],[104,88,16.25,15,0],[104,88,23.75,15,0],[104,88,23.75,12,0],[105,57,65.0,15,0],[105,57,65.0,12,0],[105,57,65.0,10,0],[105,6,40.0,12,1],[105,6,61.0,10,0],[105,6,61.0,10,0],[105,6,61.0,8,2],[105,73,10.0,13,0],[105,73,10.0,8,0],[105,73,10.0,8,0],[105,74,42.5,13,0],[105,74,42.5,10,0],[105,74,42.5,7,0],[105,76,0.0,20,0],[105,76,0.0,20,0],[106,61,5.0,12,1],[106,61,12.5,6,1],[106,61,32.5,11,0],[106,61,32.5,10,0],[106,61,32.5,5,2],[106,85,2.5,8,1],[106,85,5.0,10,0],[106,85,5.0,10,0],[106,85,5.0,7,0],[106,77,5.0,8,0],[106,77,5.0,10,0],[106,77,5.0,8,0],[106,78,35.0,20,0],[106,78,45.0,15,0],[106,86,8.75,10,0],[106,86,8.75,8,0],[106,86,8.75,6,2],[106,91,18.75,15,0],[106,91,31.25,20,0],[106,91,28.75,16,0],[106,88,23.75,20,0],[106,88,23.75,16,0],[106,88,23.75,15,0],[107,17,60.0,6,1],[107,17,100.0,3,1],[107,17,110.0,7,0],[107,17,100.0,8,0],[107,17,90.0,10,0],[107,70,102.5,12,0],[107,70,102.5,8,0],[107,70,102.5,8,0],[107,11,17.5,8,1],[107,11,42.5,15,0],[107,11,50.0,8,0],[107,11,50.0,8,0],[108,67,13.75,10,1],[108,67,18.75,7,1],[108,67,23.75,15,0],[108,67,23.75,12,0],[108,67,23.75,10,0],[108,72,26.25,11,0],[108,72,26.25,9,0],[108,4,23.75,15,0],[108,4,26.25,9,0],[108,81,8.75,13,0],[108,81,8.75,10,0],[108,83,8.75,15,0],[108,83,8.75,10,0],[108,83,8.75,9,0],[108,88,26.25,18,0],[108,88,26.25,14,0],[108,88,26.25,14,0],[108,69,21.25,14,0],[108,69,21.25,9,0],[108,69,21.25,8,0],[109,20,14.0,10,1],[109,20,20.0,12,0],[109,20,20.0,12,0],[109,20,20.0,9,0],[109,69,21.25,16,0],[109,69,21.25,11,0],[109,69,21.25,9,0],[109,4,25.0,9,0],[109,4,25.0,8,2],[109,29,6.25,5,2],[109,92,3.75,10,0],[109,92,3.75,8,0],[109,2,11.25,15,0],[109,2,13.75,8,0],[109,2,11.25,10,0],[110,65,28.75,8,0],[110,65,26.25,9,0],[110,65,26.25,8,0],[110,57,20.0,10,1],[110,57,42.5,5,1],[110,57,72.5,8,0],[110,57,65.0,13,0],[110,57,65.0,8,0],[110,67,23.75,12,0],[110,67,23.75,10,0],[110,67,23.75,8,0],[110,68,8.0,13,0],[110,68,8.0,10,0],[110,68,8.0,10,0],[110,58,23.75,14,0],[110,58,23.75,12,0],[110,58,23.75,12,0],[110,93,20.0,8,0],[110,93,20.0,8,0],[111,38,25.0,12,1],[111,38,40.0,10,1],[111,38,60.0,12,0],[111,38,60.0,12,0],[111,38,60.0,12,0],[111,9,80.0,15,0],[111,70,102.5,13,0],[111,70,102.5,9,0],[111,70,102.5,9,0],[111,89,40.0,12,1],[111,89,120.0,8,1],[111,89,200.0,8,1],[111,89,240.0,6,0],[111,89,220.0,10,0],[111,89,200.0,12,0],[112,67,12.5,10,1],[112,67,17.5,7,1],[112,67,21.25,8,0],[112,67,21.25,8,0],[112,67,21.25,8,0],[112,72,13.75,10,1],[112,72,18.75,12,1],[112,72,26.25,15,0],[112,72,26.25,12,0],[112,69,23.75,13,0],[112,69,21.25,10,0],[112,19,20.0,17,0],[112,19,20.0,10,0],[113,57,70.0,8,0],[113,57,67.5,8,0],[113,57,65.0,9,0],[113,6,40.0,10,1],[113,6,54.0,12,0],[113,6,54.0,10,0],[113,6,54.0,8,2],[113,73,12.0,9,0],[113,73,12.0,9,0],[113,73,12.0,6,0],[113,74,42.5,13,0],[113,74,42.5,11,0],[113,74,42.5,8,0],[113,76,0.0,22,0],[113,76,0.0,22,0],[114,61,5.0,10,1],[114,61,20.0,5,1],[114,61,32.5,12,0],[114,61,32.5,9,0],[114,61,27.5,9,2],[114,77,0.0,10,0],[114,77,0.0,10,0],[114,77,0.0,7,0],[114,78,50.0,14,0],[114,78,50.0,8,0],[114,88,28.75,22,0],[114,88,28.75,18,0],[114,88,28.75,143,0],[114,22,4.0,10,1],[114,22,8.0,10,0],[114,22,7.0,10,0],[114,22,7.0,9,0],[114,69,23.75,10,0],[114,69,21.25,9,0],[114,69,23.75,4,2],[114,75,36.0,20,0],[114,75,36.0,18,0],[114,75,36.0,18,0],[115,67,13.75,10,1],[115,67,23.75,17,0],[115,67,23.75,12,0],[115,67,23.75,12,0],[115,72,26.25,12,0],[115,72,26.25,10,0],[115,4,26.25,9,0],[115,4,26.25,10,0],[115,81,18.75,12,0],[115,81,18.75,8,0],[115,83,11.25,12,0],[115,83,11.25,10,0],[115,83,11.25,8,0],[115,69,23.75,12,0],[115,69,23.75,8,0],[115,69,23.75,9,0],[115,22,5.0,6,0],[115,22,5.0,6,0],[115,22,5.0,4,0],[116,65,13.75,12,1],[116,65,21.25,5,1],[116,65,26.25,10,0],[116,65,26.25,9,0],[116,65,26.25,9,0],[116,57,70.0,10,0],[116,57,70.0,9,0],[116,57,70.0,8,0],[116,67,26.25,12,0],[116,67,26.25,9,0],[116,67,26.25,8,0],[116,68,9.0,10,0],[116,68,8.0,11,0],[116,68,8.0,9,0],[116,58,25.0,15,0],[116,58,25.0,13,0],[116,58,25.0,10,0],[116,93,22.0,8,0],[116,93,22.0,8,0],[117,20,16.0,8,1],[117,20,22.0,11,0],[117,20,22.0,8,0],[117,20,22.0,6,0],[117,69,23.75,10,0],[117,69,21.25,9,0],[117,69,21.25,8,0],[117,4,26.25,6,2],[117,2,13.75,9,0],[117,2,11.25,12,0],[117,2,11.25,8,0],[117,22,7.0,5,0],[117,22,7.0,6,0],[117,22,7.0,5,0],[118,67,10.0,12,1],[118,67,21.25,10,1],[118,67,28.75,11,0],[118,67,25.0,13,0],[118,67,25.0,10,0],[118,72,25.0,14,0],[118,72,25.0,12,0],[118,81,7.5,16,0],[118,81,10.0,9,0],[118,81,7.5,13,0],[118,82,7.5,11,0],[118,82,7.5,8,0],[118,16,17.5,10,0],[118,16,17.5,10,0],[118,25,20.0,12,0],[118,25,20.0,10,0],[118,25,20.0,10,0],[119,57,12.5,14,1],[119,57,35.0,10,1],[119,57,70.0,15,0],[119,57,72.5,12,0],[119,57,72.5,12,0],[119,6,61.0,11,0],[119,6,61.0,8,0],[119,6,61.0,8,2],[119,73,12.0,10,0],[119,73,12.0,9,0],[119,73,12.0,8,0],[119,74,45.0,14,0],[119,74,45.0,11,0],[119,74,45.0,8,0],[119,76,0.0,20,0],[119,76,0.0,18,0],[119,15,36.0,22,0],[119,15,36.0,20,0],[119,15,36.0,20,0],[120,61,32.5,10,0],[120,61,27.5,9,0],[120,61,25.0,7,2],[120,77,0.0,9,0],[120,77,0.0,10,0],[120,77,0.0,9,0],[120,78,50.0,14,0],[120,78,50.0,9,0],[120,22,3.0,8,1],[120,22,5.0,4,1],[120,22,7.0,8,0],[120,22,7.0,7,0],[120,22,7.0,6,2],[120,94,25.0,7,2],[120,94,21.25,7,2],[120,94,17.5,7,2],[121,9,85.0,15,0],[121,9,85.0,12,0],[121,9,85.0,8,0],[121,70,102.5,20,0],[121,70,105.0,12,0],[121,70,105.0,8,0],[121,11,20.0,16,1],[121,11,45.0,16,0],[121,11,45.0,10,0],[121,11,45.0,8,0],[121,89,80.0,10,1],[121,89,160.0,10,1],[121,89,220.0,8,0],[121,89,220.0,8,0],[121,89,220.0,8,0],[122,83,12.5,11,0],[122,83,12.5,10,0],[122,83,12.5,8,0],[122,22,3.0,8,1],[122,22,5.0,5,1],[122,22,7.0,10,0],[122,22,7.0,8,0],[122,22,7.0,7,0],[122,82,7.5,11,0],[122,82,7.5,11,0],[122,95,8.0,15,0],[122,95,8.0,9,0],[122,25,20.0,17,0],[122,25,20.0,14,0],[122,25,20.0,12,0],[123,65,13.75,12,1],[123,65,21.25,10,1],[123,65,26.25,12,0],[123,65,26.25,10,0],[123,65,26.25,9,0],[123,57,72.5,15,0],[123,57,75.0,12,0],[123,57,75.0,10,0],[123,67,26.25,12,0],[123,67,26.25,8,0],[123,67,23.75,8,0],[123,68,9.0,11,0],[123,68,9.0,8,0],[123,68,9.0,7,0],[123,74,45.0,14,0],[123,74,45.0,8,0],[123,74,40.0,8,0],[124,20,22.0,8,0],[124,20,22.0,6,0],[124,20,22.0,5,0],[124,69,21.25,13,0],[124,69,21.25,9,0],[124,4,25.0,10,2],[124,22,7.0,5,0],[124,22,7.0,4,0],[124,22,7.0,3,0],[124,60,35.0,12,1],[124,60,50.0,15,0],[124,60,50.0,12,0],[124,60,50.0,10,0],[125,72,13.75,10,1],[125,72,18.75,6,1],[125,72,26.25,12,0],[125,72,26.25,14,0],[125,72,26.25,12,0],[125,81,6.25,6,1],[125,81,11.25,7,0],[125,81,11.25,9,0],[125,81,11.25,6,0],[125,82,7.5,10,0],[125,16,17.5,12,0],[125,16,17.5,9,0],[125,90,14.0,9,1],[125,90,22.0,12,0],[125,90,22.0,10,0],[125,90,22.0,8,0],[126,57,50.0,10,1],[126,57,75.0,14,0],[126,57,75.0,12,0],[126,57,75.0,10,0],[126,6,45.0,5,1],[126,6,61.0,11,0],[126,6,61.0,9,0],[126,6,61.0,7,0],[126,73,12.0,10,0],[126,73,12.0,6,0],[126,73,12.0,5,0],[126,76,0.0,20,0],[126,76,0.0,20,0],[126,58,26.25,12,0],[126,58,26.25,10,0],[126,58,26.25,9,0],[127,61,22.5,6,1],[127,61,32.5,11,0],[127,61,32.5,6,2],[127,61,32.5,5,0],[127,77,0.0,10,0],[127,77,0.0,10,0],[127,77,0.0,8,0],[127,78,50.0,10,0],[127,78,50.0,6,0],[127,22,4.0,9,1],[127,22,7.0,12,0],[127,22,7.0,8,0],[127,22,7.0,7,0],[127,69,21.25,10,0],[127,69,21.25,10,2],[128,9,87.5,15,0],[128,9,87.5,10,0],[128,9,87.5,6,0],[128,70,105.0,14,0],[128,70,105.0,10,0],[128,70,105.0,8,0],[128,11,27.0,8,1],[128,11,47.5,12,0],[128,11,45.0,10,0],[128,11,45.0,8,0],[128,17,60.0,10,1],[128,17,80.0,6,1],[128,17,110.0,6,0],[128,17,100.0,8,0],[128,17,90.0,10,0],[129,22,3.0,8,1],[129,22,7.0,13,0],[129,22,7.0,7,0],[129,22,7.0,6,0],[129,82,6.25,8,0],[129,82,6.25,8,0],[129,72,16.25,10,1],[129,72,26.25,15,0],[129,72,26.25,13,0],[129,72,26.25,10,0],[129,4,23.75,15,0],[129,4,26.25,10,0],[129,4,23.75,11,0],[129,68,9.0,12,0],[129,68,9.0,7,0],[129,68,9.0,7,0],[130,57,75.0,15,0],[130,57,75.0,12,0],[130,57,75.0,11,0],[130,67,26.25,12,0],[130,67,26.25,10,0],[130,67,26.25,7,0],[130,68,9.0,11,0],[130,68,9.0,8,0],[130,68,9.0,7,0],[130,74,45.0,14,0],[130,74,45.0,10,0],[130,74,45.0,8,0],[130,72,12.5,10,1],[130,72,17.5,5,1],[130,72,28.75,13,0],[130,72,28.75,12,0],[130,72,28.75,11,0],[130,96,72.5,18,0],[130,96,72.5,18,0],[130,97,57.5,15,0],[130,97,57.5,12,0],[130,97,57.5,8,0],[131,98,120.0,8,1],[131,98,160.0,12,0],[131,98,180.0,12,0],[131,98,180.0,8,0],[131,99,50.0,10,1],[131,99,100.0,12,0],[131,99,100.0,8,0],[131,99,100.0,7,0],[131,100,45.0,12,1],[131,100,59.0,14,0],[131,100,63.0,13,0],[131,100,63.0,10,0],[131,101,68.0,12,0],[131,101,68.0,8,0],[131,101,68.0,7,0],[132,82,7.5,6,0],[132,16,20.0,10,0],[132,16,20.0,6,0],[132,22,4.0,8,1],[132,22,8.0,10,0],[132,22,8.0,6,0],[132,22,8.0,6,0],[132,97,57.5,18,0],[132,97,57.5,16,0],[132,97,57.5,10,0],[132,59,30.0,10,1],[132,59,50.0,11,0],[132,59,50.0,7,0],[132,59,50.0,6,0],[132,7,12.0,13,0],[132,7,12.0,8,0],[132,7,12.0,5,0],[132,69,21.25,12,0],[132,69,21.25,9,0],[132,69,21.25,6,0],[133,57,37.5,10,1],[133,57,52.5,5,1],[133,57,75.0,17,0],[133,57,75.0,14,0],[133,57,75.0,13,0],[133,73,12.0,12,0],[133,73,12.0,7,0],[133,73,12.0,6,0],[133,58,28.75,10,0],[133,58,25.0,13,0],[133,58,25.0,10,0],[133,102,26.0,8,0],[133,102,26.0,7,0],[133,102,26.0,6,0],[133,96,77.5,18,0],[133,96,80.0,13,0],[133,67,28.75,10,0],[133,67,28.75,7,0],[134,77,0.0,11,0],[134,77,0.0,8,0],[134,77,0.0,8,0],[134,78,50.0,15,0],[134,78,50.0,8,0],[134,22,3.0,18,1],[134,22,8.0,9,0],[134,22,8.0,7,0],[134,22,8.0,5,0],[134,69,21.25,10,0],[134,69,21.25,5,2],[134,69,21.25,5,0],[134,20,14.0,10,1],[134,20,22.0,12,0],[134,20,22.0,9,0],[134,20,22.0,6,0],[135,22,3.0,8,1],[135,22,8.0,10,0],[135,22,8.0,7,0],[135,22,8.0,4,0],[135,82,7.5,11,0],[135,82,7.5,8,0],[135,4,26.25,11,0],[135,4,26.25,9,0],[135,4,26.25,7,0],[135,68,9.0,14,0],[135,68,9.0,10,0],[135,68,9.0,9,0],[135,103,16.0,8,1],[135,103,22.0,14,0],[135,103,22.0,9,0],[135,103,22.0,8,0],[135,81,11.25,10,0],[135,81,11.25,6,0],[136,57,77.5,15,0],[136,57,77.5,12,0],[136,57,77.5,10,0],[136,68,9.0,14,0],[136,68,9.0,8,0],[136,68,9.0,7,0],[136,74,45.0,10,0],[136,74,45.0,8,0],[136,74,45.0,8,0],[136,72,12.5,10,1],[136,72,17.5,5,1],[136,72,28.75,14,0],[136,72,28.75,12,0],[136,72,28.75,11,0],[136,96,80.0,15,0],[136,96,80.0,15,0],[136,102,19.0,10,0],[136,102,19.0,8,0],[136,102,19.0,6,0],[137,69,21.25,16,0],[137,69,21.25,10,0],[137,4,25.0,9,2],[137,22,8.0,11,0],[137,22,8.0,7,0],[137,22,8.0,4,0],[137,60,52.5,14,0],[137,60,52.5,8,0],[137,60,52.5,6,0],[137,59,50.0,12,0],[137,59,50.0,7,0],[137,59,50.0,6,0],[138,9,90.0,15,0],[138,9,90.0,12,0],[138,9,90.0,8,0],[138,70,105.0,14,0],[138,70,105.0,8,0],[138,70,105.0,8,0],[138,11,20.0,10,1],[138,11,35.0,5,1],[138,11,47.5,17,0],[138,11,47.5,14,0],[138,11,47.5,8,0],[138,17,40.0,8,1],[138,17,80.0,6,1],[138,17,110.0,6,0],[138,17,100.0,9,0],[138,17,90.0,10,0],[138,104,65.0,13,0],[138,104,65.0,15,0],[138,104,65.0,13,0],[139,57,37.5,10,1],[139,57,52.5,5,1],[139,57,77.5,20,0],[139,57,80.0,15,0],[139,57,80.0,12,0],[139,73,12.0,12,0],[139,73,12.0,8,0],[139,73,12.0,6,0],[139,102,19.0,13,0],[139,102,19.0,9,0],[139,102,19.0,7,0],[139,96,85.0,20,0],[139,96,87.5,20,0],[139,74,45.0,15,0],[139,74,45.0,11,0],[139,74,45.0,8,0],[139,15,24.0,18,0],[139,15,24.0,18,0],[139,15,24.0,15,0],[140,22,4.0,8,1],[140,22,8.0,12,0],[140,22,8.0,7,0],[140,22,8.0,5,0],[140,69,21.25,5,0],[140,20,24.0,10,0],[140,20,24.0,6,0],[140,20,24.0,4,0],[140,20,24.0,4,0],[141,65,16.25,10,1],[141,65,23.75,12,0],[141,65,23.75,13,0],[141,65,23.75,11,0],[141,66,30.0,8,1],[141,66,40.0,5,1],[141,66,60.0,8,0],[141,66,50.0,8,0],[141,57,45.0,8,1],[141,57,67.5,4,1],[141,57,90.0,10,0],[141,57,90.0,10,0],[141,57,90.0,8,0],[141,67,15.0,10,1],[141,67,25.0,12,0],[141,67,25.0,9,0],[141,67,25.0,7,0],[141,68,6.0,8,1],[141,68,10.0,10,0],[141,68,10.0,7,0],[141,68,10.0,7,0],[141,58,15.0,10,1],[141,58,25.0,12,0],[141,58,25.0,10,0],[141,58,25.0,10,0],[142,60,30.0,8,1],[142,60,52.5,12,0],[142,60,50.0,7,0],[142,60,45.0,8,0],[142,69,2.5,10,1],[142,69,5.0,8,1],[142,69,10.0,8,1],[142,69,17.5,5,0],[142,69,15.0,8,0],[142,69,15.0,5,2],[142,4,12.5,10,1],[142,4,21.25,8,0],[142,4,17.5,9,2],[142,22,3.0,8,1],[142,22,8.0,12,0],[142,22,8.0,8,0],[142,22,8.0,4,0],[142,13,30.0,8,1],[142,13,40.0,8,1],[142,13,50.0,6,1],[142,13,60.0,6,1],[142,13,65.0,7,0],[142,13,60.0,5,0],[142,13,60.0,3,0],[142,13,50.0,6,0],[143,9,95.0,12,2],[143,9,65.0,8,2],[143,9,50.0,7,2],[143,11,12.5,8,1],[143,11,35.0,5,1],[143,11,50.0,10,0],[143,11,55.0,10,0],[143,11,55.0,8,0],[143,70,65.0,10,1],[143,70,107.5,12,0],[143,70,107.5,11,0],[143,70,107.5,8,0],[143,89,120.0,8,1],[143,89,160.0,8,1],[143,89,240.0,12,0],[143,89,260.0,6,0],[143,89,240.0,6,0],[143,104,72.5,15,0],[143,104,72.5,15,0],[143,104,72.5,15,0],[144,69,10.0,10,1],[144,69,12.5,15,0],[144,69,15.0,6,0],[144,69,12.5,8,2],[144,4,15.0,10,0],[144,4,15.0,8,2],[144,22,4.0,10,1],[144,22,7.0,15,0],[144,22,7.0,10,0],[144,22,7.0,6,0],[144,103,16.0,10,1],[144,103,24.0,9,0],[144,103,24.0,5,0],[144,103,24.0,5,0],[144,2,7.5,10,1],[144,2,10.0,10,0],[144,2,10.0,8,0],[144,2,10.0,8,0],[144,97,30.0,13,0],[144,97,30.0,10,0],[144,97,30.0,8,0],[145,9,70.0,12,2],[145,9,70.0,8,2],[145,9,70.0,4,2],[145,70,60.0,10,0],[145,70,60.0,8,2],[145,70,60.0,6,2],[145,89,40.0,10,1],[145,89,80.0,10,1],[145,89,120.0,8,0],[145,89,160.0,12,0],[145,89,160.0,12,0],[145,89,160.0,7,0],[145,104,60.0,12,0],[145,104,60.0,8,2],[145,104,60.0,6,2],[145,38,20.0,10,1],[145,38,40.0,12,0],[145,38,40.0,8,0],[145,38,40.0,8,2],[145,71,40.0,15,0],[145,71,40.0,15,0],[145,71,40.0,10,0],[146,57,15.0,10,1],[146,57,35.0,8,1],[146,57,60.0,6,1],[146,57,90.0,12,0],[146,57,90.0,10,0],[146,57,90.0,8,0],[146,6,50.0,10,0],[146,6,50.0,8,0],[146,6,50.0,6,2],[146,73,12.0,10,0],[146,73,12.0,6,2],[146,73,12.0,5,2],[146,74,15.0,15,0],[146,96,35.0,8,1],[146,96,50.0,12,0],[146,96,50.0,12,0],[146,58,15.0,15,0],[146,58,17.5,12,0],[146,58,17.5,10,0],[147,61,10.0,10,1],[147,61,20.0,8,1],[147,61,30.0,10,0],[147,61,27.5,9,0],[147,61,25.0,8,2],[147,22,3.0,10,1],[147,22,7.0,10,0],[147,22,7.0,10,0],[147,22,7.0,10,0],[147,77,7.0,10,0],[147,77,7.0,10,0],[147,77,7.0,7,0],[147,59,50.0,5,0],[147,59,40.0,8,0],[147,59,35.0,10,0],[147,69,10.0,10,0],[147,69,7.5,10,0],[148,2,4.0,10,1],[148,2,6.0,10,0],[148,2,5.0,10,0],[148,2,5.0,11,0],[148,59,41.0,12,0],[148,59,41.0,9,0],[148,107,9.0,10,0],[148,107,9.0,7,0],[148,107,4.0,12,0],[148,108,9.0,13,0],[148,108,9.0,10,0],[148,7,14.0,9,0],[148,7,14.0,5,0],[148,7,10.0,7,0],[148,16,20.0,7,0],[148,16,20.0,4,0],[149,57,45.0,8,1],[149,57,68.0,4,1],[149,57,90.0,8,0],[149,57,81.0,8,0],[149,57,81.0,8,0],[149,67,4.1,10,1],[149,67,8.1,14,0],[149,67,8.1,10,0],[149,67,8.1,8,0],[149,68,9.0,8,0],[149,68,9.0,9,0],[149,68,9.0,9,0],[149,58,18.0,18,0],[149,58,23.0,12,0],[149,58,23.0,10,0],[149,102,27.0,10,1],[149,102,14.0,12,0],[149,102,14.0,8,0],[149,102,14.0,6,0],[150,69,5.1,14,0],[150,69,5.1,9,0],[150,69,5.1,10,2],[150,4,8.1,10,0],[150,4,8.1,9,2],[150,22,5.0,6,1],[150,22,7.101,15,0],[150,22,7.5,10,0],[150,22,7.4,8,0],[150,103,12.0,10,1],[150,103,24.0,12,0],[150,103,24.0,8,0],[150,103,24.0,7,0],[150,2,3.1,10,1],[150,2,6.1,11,0],[150,2,5.1,12,0],[150,2,5.1,11,0],[151,59,15.0,12,1],[151,59,30.0,10,1],[151,59,60.0,13,0],[151,59,60.0,10,0],[151,59,60.0,7,0],[151,2,12.5,10,0],[151,2,12.5,9,0],[151,33,10.0,11,0],[151,33,10.0,7,0],[151,33,10.0,7,0],[151,69,15.0,9,0],[151,69,15.0,8,0],[151,69,15.0,7,0],[151,16,17.5,11,0],[151,16,17.5,7,0],[151,108,10.0,7,0],[151,108,10.0,7,0],[151,97,20.0,23,0],[151,97,25.0,13,0],[151,97,25.0,9,0],[152,57,35.0,10,1],[152,57,60.0,8,1],[152,57,92.5,12,0],[152,57,92.5,10,0],[152,57,92.5,8,0],[152,6,52.0,10,0],[152,6,52.0,7,0],[152,6,52.0,6,2],[152,73,10.0,10,0],[152,73,10.0,7,2],[152,73,10.0,6,2],[152,96,50.0,10,1],[152,96,81.0,5,0],[152,96,68.0,16,0],[153,61,11.5,10,1],[153,61,20.5,8,1],[153,61,34.5,12,0],[153,61,34.5,9,0],[153,61,34.5,7,2],[153,22,5.0,6,1],[153,22,7.0,9,0],[153,22,7.0,4,0],[153,22,7.0,8,0],[153,77,0.0,10,0],[153,77,0.0,8,0],[153,77,0.0,7,0],[153,69,14.0,15,0],[153,69,23.0,10,0],[153,69,23.0,8,0],[153,60,59.0,12,0],[153,60,59.0,7,0],[153,60,59.0,7,0],[154,2,3.0,10,1],[154,2,7.0,15,0],[154,2,8.0,9,0],[154,2,8.0,7,0],[154,59,63.0,7,0],[154,59,63.0,5,0],[154,107,6.8,8,0],[154,107,9.0,3,2],[154,107,6.8,4,2],[154,108,9.0,9,0],[154,108,9.0,5,0],[154,109,10.0,12,0],[154,109,10.0,10,0],[154,109,10.0,7,0],[154,33,10.0,10,0],[154,33,10.0,7,0],[155,9,70.0,12,2],[155,9,70.0,10,2],[155,9,70.0,10,2],[155,70,60.0,12,0],[155,70,60.0,10,2],[155,70,60.0,10,2],[155,89,40.0,10,1],[155,89,80.0,10,1],[155,89,120.0,4,1],[155,89,170.0,12,0],[155,89,170.0,13,0],[155,89,180.0,12,0],[155,104,35.0,12,1],[155,104,60.0,15,2],[155,104,60.0,15,2],[155,104,60.0,15,0],[155,38,40.0,15,0],[155,38,40.0,14,0],[155,38,40.0,12,2],[156,57,35.0,8,1],[156,57,60.0,6,1],[156,57,81.0,8,0],[156,57,81.0,8,0],[156,57,81.0,8,0],[156,67,14.0,10,1],[156,67,23.0,12,0],[156,67,23.0,10,0],[156,67,23.0,10,0],[156,68,9.0,8,0],[156,68,9.0,7,0],[156,68,9.0,7,0],[156,58,23.0,15,0],[156,58,23.0,15,0],[156,58,23.0,10,0],[156,102,27.0,10,1],[156,102,9.0,8,0],[156,102,9.0,8,0],[156,102,9.0,6,0],[157,69,15.0,12,0],[157,69,15.0,8,0],[157,69,15.0,8,2],[157,4,17.5,7,0],[157,4,15.0,10,2],[157,22,5.0,8,1],[157,22,9.0,12,0],[157,22,9.0,10,0],[157,22,9.0,8,0],[157,103,14.0,10,1],[157,103,22.0,12,0],[157,103,22.0,10,0],[157,103,22.0,10,0],[157,18,14.0,10,0],[157,18,14.0,8,0],[157,18,14.0,6,0],[158,5,60.0,8,1],[158,5,80.0,6,1],[158,5,100.0,4,1],[158,5,120.0,4,0],[158,5,120.0,3,0],[158,5,120.0,3,0],[158,13,40.0,8,1],[158,13,60.0,4,1],[158,13,70.0,3,0],[158,13,60.0,9,0],[158,13,60.0,5,0],[158,104,63.0,15,0],[158,104,63.0,13,0],[158,104,63.0,10,0],[158,102,4.5,8,0],[158,102,4.5,5,0],[158,102,4.5,5,0],[158,69,4.5,10,1],[158,69,14.0,15,0],[158,69,14.0,15,0],[158,69,18.0,15,0],[159,5,60.0,6,1],[159,5,80.0,4,1],[159,5,100.0,2,0],[159,5,100.0,2,0],[159,5,100.0,2,0],[159,5,100.0,3,0],[159,13,40.0,8,1],[159,13,50.0,5,1],[159,13,60.0,5,0],[159,13,65.0,5,0],[159,13,65.0,4,0],[159,57,35.0,8,1],[159,57,70.0,10,0],[159,57,70.0,10,0],[159,57,70.0,10,0],[159,38,50.0,8,0],[159,38,50.0,8,0],[159,38,50.0,8,0],[159,15,24.0,16,0],[159,15,24.0,13,0],[159,15,24.0,10,0],[160,13,20.0,10,1],[160,13,40.0,8,1],[160,13,50.0,5,1],[160,13,60.0,3,1],[160,13,70.0,2,0],[160,13,65.0,6,0],[160,13,65.0,6,0],[160,13,65.0,6,0],[160,45,20.0,8,1],[160,45,30.0,4,1],[160,45,40.0,4,0],[160,45,40.0,3,0],[160,45,40.0,3,0],[160,57,36.0,10,1],[160,57,65.5,12,0],[160,57,65.5,12,0],[160,57,65.5,10,0],[160,58,18.0,20,0],[160,58,18.0,20,0],[160,22,7.0,20,0],[160,22,7.0,10,0],[160,34,7.0,15,0],[160,34,7.0,9,0],[160,34,7.0,6,0],[160,4,18.0,15,0],[160,4,23.0,15,0],[160,4,23.0,15,0],[160,110,18.0,6,1],[160,110,4.5,9,0],[160,110,4.5,6,0],[160,110,4.5,5,0],[161,55,20.0,10,1],[161,55,30.0,7,1],[161,55,40.0,4,1],[161,55,55.0,12,0],[161,55,55.0,11,0],[161,55,55.0,7,0],[161,111,40.0,9,1],[161,111,60.0,5,0],[161,111,60.0,7,0],[161,111,60.0,6,0],[161,1,0.0,8,1],[161,1,0.0,4,1],[161,1,10.0,6,0],[161,1,10.0,6,0],[161,1,10.0,6,0],[161,24,0.0,2,1],[162,5,40.0,8,1],[162,5,60.0,6,1],[162,5,80.0,4,1],[162,5,120.0,3,0],[162,5,120.0,2,0],[162,5,120.0,2,0],[162,5,120.0,2,0],[162,13,40.0,8,1],[162,13,50.0,6,1],[162,13,65.0,6,0],[162,13,60.0,8,0],[162,13,60.0,8,0],[162,104,63.0,18,0],[162,104,63.0,15,0],[162,102,36.0,6,1],[162,102,4.5,8,0],[162,102,4.5,7,0],[162,102,4.5,5,0],[162,4,18.0,15,1],[162,4,23.0,15,0],[162,4,28.0,15,0],[162,4,27.0,12,0],[163,57,41.0,8,1],[163,57,68.0,10,0],[163,57,68.0,12,0],[163,57,68.0,8,0],[163,67,4.1,10,1],[163,67,8.1,14,0],[163,67,8.1,12,0],[163,67,32.0,8,0],[163,68,10.0,6,0],[163,68,9.0,6,0],[163,68,9.0,3,0],[163,58,15.0,10,1],[163,58,23.0,17,0],[163,58,23.0,13,0],[163,58,23.0,14,0],[163,24,0.0,9,0],[163,24,0.0,7,0],[163,24,0.0,3,0],[164,57,40.0,8,1],[164,57,70.0,10,0],[164,57,70.0,8,0],[164,57,65.0,8,0],[164,67,10.0,8,1],[164,67,17.5,10,0],[164,67,15.0,10,0],[164,67,15.0,7,0],[164,68,10.0,5,0],[164,68,9.0,5,0],[164,68,9.0,4,2],[164,58,10.0,8,1],[164,58,17.5,15,0],[164,58,17.5,11,0],[164,58,17.5,10,0],[164,24,0.0,6,1],[164,24,0.0,10,0],[164,24,0.0,6,0],[164,24,0.0,4,0],[165,4,15.0,10,0],[165,4,15.0,8,2],[165,22,4.0,10,1],[165,22,7.0,15,0],[165,22,7.0,10,0],[165,22,7.0,6,0],[165,13,40.0,10,1],[165,13,50.0,8,1],[165,13,60.0,10,0],[165,13,60.0,6,0],[165,13,60.0,6,0],[165,78,20.0,10,1],[165,78,40.0,8,0],[165,78,35.0,7,0],[165,78,30.0,7,0],[165,107,5.0,10,0],[165,107,5.0,8,0],[165,107,5.0,7,0],[166,17,40.0,8,1],[166,17,60.0,6,1],[166,17,80.0,4,1],[166,17,100.0,2,1],[166,17,110.0,4,0],[166,17,100.0,8,0],[166,17,100.0,6,0],[166,38,20.0,10,1],[166,38,45.0,15,0],[166,38,45.0,15,0],[166,38,45.0,10,0],[166,70,30.0,10,1],[166,70,60.0,12,0],[166,70,60.0,8,2],[166,70,50.0,7,2],[166,9,40.0,10,1],[166,9,70.0,15,2],[166,9,60.0,10,2],[166,9,50.0,8,2],[166,71,20.0,20,1],[166,71,40.0,20,0],[166,71,35.0,13,0],[166,71,30.0,14,0],[167,57,70.0,12,0],[167,57,70.0,12,0],[167,57,70.0,11,0],[167,6,60.0,6,0],[167,6,50.0,8,0],[167,6,50.0,7,2],[167,73,12.0,8,0],[167,73,10.0,7,0],[167,73,8.0,8,0],[167,58,17.5,18,0],[167,58,17.5,13,0],[167,58,17.5,11,0],[168,61,11.5,10,1],[168,61,20.0,6,1],[168,61,35.0,10,0],[168,61,30.0,8,0],[168,61,25.0,8,2],[168,13,40.0,10,1],[168,13,50.0,5,1],[168,13,60.0,3,1],[168,13,70.0,2,0],[168,13,60.0,6,0],[168,13,50.0,7,0],[168,2,5.0,7,1],[168,2,7.5,4,0],[168,2,3.75,6,0],[168,2,2.5,15,0],[168,22,3.0,10,1],[168,22,7.0,10,0],[168,22,5.0,12,0],[168,22,3.0,16,0],[168,107,2.5,8,0],[168,107,5.0,4,2],[168,107,2.5,8,0],[169,11,18.0,10,1],[169,11,36.0,5,1],[169,11,50.0,10,0],[169,11,45.0,10,0],[169,11,45.0,8,0],[169,98,100.0,8,1],[169,98,140.0,6,1],[169,98,180.0,10,0],[169,98,180.0,8,0],[169,98,180.0,8,0],[169,70,35.0,10,1],[169,70,59.0,10,0],[169,70,55.0,10,0],[169,70,50.0,10,0],[169,9,69.0,12,0],[169,9,59.0,11,0],[169,9,50.0,10,2],[170,112,1.5,10,1],[170,112,5.7,20,0],[170,112,5.7,15,0],[170,112,5.7,9,0],[170,59,45.0,5,1],[170,59,68.0,9,0],[170,59,63.0,6,0],[170,107,4.5,15,0],[170,107,4.5,13,0],[170,107,4.5,12,0],[170,108,9.0,12,0],[170,108,9.0,10,0],[170,84,10.0,12,0],[170,84,10.0,10,0],[170,84,10.0,7,0],[170,95,8.0,7,0],[170,95,7.0,7,0],[171,57,42.0,8,1],[171,57,72.0,5,2],[171,57,63.0,8,0],[171,57,59.0,8,2],[171,67,14.0,10,1],[171,67,23.0,12,0],[171,67,23.0,8,0],[171,67,18.0,10,0],[171,68,10.0,5,0],[171,68,8.0,7,0],[171,68,8.0,5,2],[171,58,14.0,10,1],[171,58,23.0,20,0],[171,58,23.0,18,0],[171,58,23.0,10,0],[171,102,36.0,8,1],[171,102,4.5,11,0],[171,102,9.0,10,0],[171,102,14.0,10,0],[172,13,40.0,8,1],[172,13,50.0,5,1],[172,13,60.0,3,1],[172,13,70.0,6,0],[172,13,60.0,8,0],[172,13,60.0,4,0],[172,60,32.0,8,1],[172,60,59.0,5,2],[172,60,45.0,9,0],[172,60,39.0,8,0],[172,22,3.0,10,1],[172,22,7.0,17,0],[172,22,6.0,10,0],[172,22,4.0,12,0],[172,107,9.0,7,2],[172,107,4.5,11,0],[172,107,4.5,11,0],[172,108,9.0,14,0],[172,108,9.0,11,2],[173,112,1.5,10,1],[173,112,3.75,15,0],[173,112,5.0,13,0],[173,112,5.0,9,0],[173,59,70.0,10,0],[173,59,65.0,7,0],[173,107,5.0,11,0],[173,107,5.0,10,2],[173,107,5.0,8,2],[173,108,10.0,7,0],[173,108,7.5,7,2],[173,84,10.0,14,0],[173,84,10.0,11,0],[173,84,10.0,7,0],[173,95,7.0,9,0],[173,95,7.0,7,0],[174,57,42.0,10,1],[174,57,68.0,10,0],[174,57,63.0,9,0],[174,57,63.0,9,0],[174,58,27.0,17,0],[174,58,32.0,12,0],[174,58,32.0,12,0],[174,102,36.0,10,1],[174,102,4.5,13,0],[174,102,4.5,8,0],[174,102,9.0,8,0],[174,67,23.0,15,0],[174,67,27.0,10,0],[174,67,27.0,15,0],[174,113,14.7,11,0],[174,113,14.7,9,0],[174,113,14.7,7,0],[174,68,8.0,10,0],[174,68,8.0,8,0],[174,68,8.0,5,0],[175,61,9.0,8,1],[175,61,14.0,8,1],[175,61,27.0,5,1],[175,61,36.0,11,0],[175,61,32.0,9,2],[175,61,27.0,8,0],[175,59,45.0,6,1],[176,57,42.0,8,1],[176,57,63.0,8,0],[176,57,59.0,8,0],[176,57,59.0,8,2],[176,58,32.0,16,0],[176,58,32.0,15,0],[176,58,32.0,13,0],[176,102,23.0,8,1],[176,102,4.5,10,0],[176,102,4.5,7,0],[176,102,9.0,6,0],[176,67,27.0,14,0],[176,67,32.0,9,0],[176,67,27.0,8,0],[176,68,10.0,4,0],[176,68,7.0,9,0],[176,68,7.0,8,0],[176,19,25.0,7,0],[176,19,25.0,5,0],[177,61,14.0,7,1],[177,61,23.0,5,1],[177,61,32.0,7,0],[177,61,27.0,8,0],[177,61,23.0,7,2],[177,13,30.0,8,1],[177,13,40.0,5,1],[177,13,50.0,5,1],[177,13,60.0,3,1],[177,13,70.0,6,0],[177,13,60.0,6,0],[177,13,60.0,5,0],[177,22,4.0,8,1],[177,22,7.0,12,2],[177,22,7.0,7,2],[177,22,6.0,7,2],[177,107,4.5,9,0],[177,107,4.5,8,2],[177,60,32.0,8,1],[177,60,45.0,7,0],[177,60,39.0,9,0],[177,60,39.0,8,0],[177,108,9.0,8,2],[178,57,65.0,8,0],[178,57,60.0,10,0],[178,57,55.0,7,2],[178,68,8.0,9,0],[178,68,8.0,6,0],[178,68,8.0,4,0],[178,58,20.0,10,0],[178,102,36.0,8,1],[178,102,0.0,6,2],[178,102,7.0,5,2],[178,102,21.0,10,2],[179,112,3.4,10,1],[179,112,5.7,14,0],[179,112,5.7,12,0],[179,112,5.7,11,0],[179,107,9.0,11,0],[179,107,9.0,9,0],[179,107,9.0,6,2],[179,108,14.0,6,0],[179,108,9.0,9,0],[179,84,10.0,12,0],[179,84,10.0,9,0],[179,84,10.0,6,0],[179,95,7.0,9,0],[179,95,7.0,8,0],[179,22,7.0,12,0],[179,22,7.0,10,2],[179,22,7.0,8,2],[180,61,14.0,8,1],[180,61,23.0,4,1],[180,61,32.0,9,0],[180,61,32.0,7,0],[180,61,32.0,6,2],[180,13,20.0,12,1],[180,13,40.0,6,1],[180,13,60.0,3,1],[180,13,70.0,6,0],[180,13,70.0,5,0],[180,13,65.0,6,0],[180,22,7.0,15,0],[180,22,6.0,8,0],[180,22,5.0,10,0],[180,107,6.8,4,2],[180,107,6.8,3,2],[180,60,45.0,8,0],[180,60,45.0,6,0],[180,60,45.0,6,2],[181,57,63.0,9,0],[181,57,63.0,9,0],[181,57,63.0,9,0],[181,57,63.0,7,0],[181,114,54.0,12,0],[181,114,54.0,11,0],[181,114,54.0,9,0],[181,114,54.0,6,0],[181,74,45.0,8,0],[181,74,39.0,7,0],[181,74,39.0,6,0],[181,19,20.0,12,0],[182,13,40.0,8,1],[182,13,60.0,4,1],[182,13,70.0,6,0],[182,13,70.0,5,0],[182,13,64.6,4,0],[182,22,7.5,14,0],[182,22,7.5,8,0],[182,22,7.5,4,2],[182,107,2.1,11,2],[182,107,2.1,7,0],[182,107,2.1,7,0],[182,108,3.1,10,0],[182,108,3.1,8,2],[182,20,22.5,4,0],[182,20,20.0,6,0],[182,20,20.0,5,0],[183,68,7.5,14,0],[183,68,7.5,7,0],[183,68,7.5,4,0],[183,6,2.0,8,1],[183,6,6.0,10,0],[183,6,7.0,10,0],[183,6,7.0,6,0],[183,8,5.0,12,0],[183,8,7.0,5,0],[183,8,6.0,7,0],[183,74,5.0,12,0],[183,74,5.0,11,0],[183,74,5.0,9,0],[184,69,3.0,15,0],[184,69,3.0,10,0],[184,69,3.0,7,2],[184,4,4.0,13,0],[184,4,4.0,10,2],[184,22,5.0,10,1],[184,22,7.5,13,0],[184,22,7.5,7,0],[184,22,7.5,5,0],[184,13,20.0,8,1],[184,13,40.0,6,1],[184,13,60.0,5,0],[184,13,60.0,6,0],[184,13,60.0,6,0],[184,60,7.0,8,0],[184,60,7.0,6,0],[184,60,7.0,5,0],[185,22,7.5,14,0],[185,22,7.5,7,2],[185,22,7.5,6,2],[185,115,4.0,7,1],[185,115,5.0,14,0],[185,115,5.0,7,0],[185,115,5.0,6,0],[185,52,1.0,6,1],[185,52,2.0,15,0],[185,52,2.0,10,0],[185,52,2.0,9,0],[185,116,15.0,14,0],[185,116,15.0,11,0],[185,54,7.5,20,0],[185,54,7.5,10,0],[185,61,5.0,7,0],[185,61,4.0,10,0],[185,61,4.0,8,0],[186,6,2.0,10,1],[186,6,6.0,10,0],[186,6,6.0,10,0],[186,6,6.0,6,0],[186,6,6.0,4,0],[186,8,6.0,7,0],[186,8,6.0,9,0],[186,8,6.0,9,0],[186,8,6.0,7,0],[186,74,5.0,14,0],[186,74,5.0,12,0],[186,74,5.0,11,0],[186,115,5.0,11,0],[186,115,5.0,6,0],[186,115,4.0,6,0],[186,115,3.0,8,0],[187,4,4.0,8,0],[187,4,4.0,8,2],[187,22,5.0,7,1],[187,22,7.5,16,0],[187,22,7.5,10,0],[187,22,7.5,8,0],[187,13,20.0,10,1],[187,13,40.0,7,1],[187,13,60.0,7,0],[187,13,60.0,7,0],[187,13,60.0,5,0],[187,13,60.0,4,0],[187,60,7.0,13,0],[187,60,7.0,9,0],[187,60,7.0,4,0],[187,52,3.0,9,0],[187,52,3.0,10,0],[187,52,3.0,4,0],[188,22,7.5,18,0],[188,22,7.5,10,2],[188,22,7.5,8,2],[188,115,4.0,7,1],[188,115,5.0,20,0],[188,115,5.0,7,0],[188,115,5.0,6,0],[188,52,1.0,10,1],[188,52,3.0,14,0],[188,52,3.0,9,0],[188,52,3.0,6,0],[188,116,16.0,16,0],[188,116,16.0,14,0],[188,54,10.0,13,0],[188,54,10.0,6,0],[188,61,5.0,10,0],[188,61,5.0,10,0],[188,61,5.0,8,0],[189,6,2.0,10,1],[189,6,6.0,15,0],[189,6,6.0,15,0],[189,6,6.0,15,0],[189,6,6.0,12,0],[189,8,6.0,10,0],[189,8,5.0,10,0],[189,8,5.0,9,0],[189,8,5.0,8,0],[189,74,5.0,20,0],[189,74,5.0,15,0],[189,74,5.0,12,0],[189,115,6.0,14,0],[189,115,6.0,7,0],[189,115,6.0,5,0],[189,115,4.0,8,0],[190,4,4.0,13,0],[190,4,4.0,11,2],[190,22,5.0,7,1],[190,22,10.0,10,0],[190,22,10.0,6,0],[190,22,10.0,4,0],[190,13,40.0,8,1],[190,13,60.0,8,0],[190,13,60.0,7,0],[190,13,60.0,5,0],[190,13,60.0,3,0],[190,60,7.0,11,0],[190,60,6.0,10,0],[190,60,6.0,8,0],[190,69,3.0,18,0],[190,69,3.0,14,0],[190,69,3.0,8,0],[191,115,4.0,8,1],[191,115,6.0,16,0],[191,115,6.0,11,0],[191,115,6.0,10,0],[191,52,1.0,10,1],[191,52,3.0,15,0],[191,52,3.0,10,0],[191,52,3.0,6,0],[191,54,10.0,15,0],[191,54,10.0,8,0],[191,61,5.0,12,0],[191,61,5.0,10,0],[191,61,5.0,8,0],[192,6,3.0,8,1],[192,6,6.0,3,1],[192,6,7.0,8,0],[192,6,7.0,7,0],[192,6,7.0,6,0],[192,8,6.0,9,0],[192,8,6.0,8,0],[192,8,6.0,7,0],[192,74,6.0,16,0],[192,74,6.0,13,0],[192,74,6.0,9,0],[192,115,6.0,17,0],[193,22,5.0,8,1],[193,22,7.5,12,0],[193,22,7.5,10,0],[193,22,7.5,8,0],[193,60,6.0,10,0],[193,60,6.0,8,0],[193,60,6.0,6,0],[193,69,3.0,9,0],[193,69,3.0,5,0],[193,69,3.0,4,0],[193,59,6.0,10,1],[193,59,9.0,12,0],[193,59,10.0,12,0],[193,59,10.0,9,0],[193,59,10.0,6,0],[194,6,55.0,8,1],[194,6,70.0,12,0],[194,6,85.0,10,0],[194,6,85.0,7,0],[194,6,85.0,6,0],[194,8,70.0,10,0],[194,8,70.0,8,0],[194,8,70.0,7,0],[194,8,70.0,7,0],[194,74,6.0,9,0],[194,74,6.0,8,0],[194,74,6.0,6,0],[194,115,5.0,11,0],[194,115,5.0,7,0],[194,115,5.0,5,0],[195,22,5.0,10,1],[195,22,7.5,14,0],[195,22,7.5,12,0],[195,22,7.5,10,0],[195,60,6.0,6,0],[195,60,6.0,8,0],[195,60,6.0,7,0],[195,69,3.0,12,0],[195,69,3.0,8,0],[195,69,3.0,6,0],[195,59,6.0,10,1],[195,59,11.0,12,0],[195,59,11.0,10,0],[195,59,11.0,7,0],[195,59,11.0,6,0],[196,117,null,30,0],[196,117,null,30,0],[196,117,null,30,0],[196,118,null,5,0],[196,118,null,5,0],[196,118,null,5,0],[196,118,null,5,0],[196,119,null,5,0],[196,119,null,5,0],[196,119,null,5,0],[196,120,null,8,0],[196,120,null,8,0],[196,120,null,8,0],[196,121,null,5,0],[196,121,null,5,0],[196,121,null,5,0],[197,115,3.0,6,1],[197,115,3.0,11,0],[197,115,5.0,17,0],[197,115,5.0,12,0],[197,115,5.0,7,0],[197,52,1.0,10,1],[197,52,3.0,17,0],[197,52,3.0,12,0],[197,52,3.0,8,0],[197,54,10.0,12,0],[197,54,10.0,7,0],[197,61,5.0,13,0],[197,61,5.0,12,0],[197,61,5.0,10,0],[197,116,16.0,17,0],[197,116,16.0,17,0],[198,117,null,30,0],[198,117,null,30,0],[198,117,null,30,0],[198,118,null,5,0],[198,118,null,5,0],[198,118,null,5,0],[198,118,null,5,0],[198,119,null,5,0],[198,119,null,5,0],[198,119,null,5,0],[198,120,null,8,0],[198,120,null,8,0],[198,120,null,8,0],[198,121,null,5,0],[198,121,null,5,0],[198,121,null,5,0],[198,38,5.0,12,0],[198,38,5.0,12,0],[198,38,5.0,12,0],[198,104,3.0,15,0],[198,104,4.0,15,0],[198,104,5.0,15,0],[198,9,3.0,5,0],[198,9,2.0,15,0],[198,9,2.0,15,0],[199,6,55.0,8,1],[199,6,85.0,12,0],[199,6,85.0,11,0],[199,6,85.0,8,0],[199,6,85.0,7,0],[199,8,70.0,12,0],[199,8,70.0,10,0],[199,8,70.0,9,0],[199,8,70.0,8,0],[199,74,6.0,12,0],[199,74,6.0,10,0],[199,74,6.0,7,0],[199,115,5.0,16,0],[199,115,5.0,9,0],[199,115,5.0,8,0],[200,22,5.0,8,1],[200,22,7.5,18,0],[200,22,7.5,14,0],[200,22,7.5,12,0],[200,60,3.0,10,1],[200,60,6.0,15,0],[200,60,6.0,12,0],[200,60,6.0,10,0],[200,69,3.0,15,0],[200,69,3.0,13,0],[200,69,3.0,12,0],[200,59,12.0,6,0],[200,59,12.0,6,0],[200,59,12.0,6,0],[200,59,12.0,5,0],[201,117,null,30,0],[201,117,null,30,0],[201,117,null,30,0],[201,118,null,5,0],[201,118,null,5,0],[201,118,null,5,0],[201,118,null,5,0],[201,119,null,5,0],[201,119,null,5,0],[201,119,null,5,0],[201,120,null,8,0],[201,120,null,8,0],[201,120,null,8,0],[201,121,null,5,0],[201,121,null,5,0],[201,121,null,5,0],[202,22,5.0,8,1],[202,22,7.5,20,0],[202,22,7.5,14,0],[202,22,7.5,11,0],[202,22,7.5,9,0],[202,122,15.0,12,0],[202,122,15.0,9,0],[202,122,15.0,9,0],[202,69,14.0,15,0],[202,69,14.0,13,0],[202,69,14.0,15,0],[202,69,18.0,12,0],[202,16,11.0,17,0],[202,16,11.0,10,0],[202,16,11.0,7,0],[202,4,23.0,15,0],[202,4,27.0,13,0],[202,4,32.0,10,0],[202,24,0.0,6,0],[202,24,0.0,3,0],[202,24,0.0,3,0],[202,43,25.0,10,0],[202,43,25.0,8,0],[202,43,25.0,6,0],[203,2,15.0,20,0],[203,2,20.0,18,0],[203,2,25.0,8,0],[203,2,20.0,8,0],[203,20,17.5,9,0],[203,20,17.5,7,0],[203,20,17.5,5,0],[203,13,50.0,8,0],[203,13,60.0,8,0],[203,13,50.0,7,0],[203,123,140.0,8,0],[203,123,180.0,6,0],[203,123,200.0,6,0],[203,9,34.0,15,0],[203,9,34.0,11,0],[203,9,34.0,10,0],[203,70,45.0,15,0],[203,70,55.0,15,0],[203,70,65.0,10,0],[204,59,4.0,8,1],[204,59,6.0,6,1],[204,59,8.0,6,1],[204,59,13.0,8,0],[204,59,10.0,12,0],[204,42,40.0,10,1],[204,42,50.0,6,1],[204,42,60.0,10,0],[204,42,60.0,10,0],[204,6,55.0,8,1],[204,6,100.0,12,0],[204,6,100.0,12,0],[204,125,20.0,8,1],[204,125,30.0,10,0],[204,69,2.0,10,1],[204,69,4.0,10,0],[204,22,5.0,8,1],[204,22,7.5,12,2],[204,71,10.0,10,1],[204,71,20.0,15,2],[205,51,0.0,10,0],[205,128,null,8,0],[205,130,null,8,0],[205,131,null,8,0],[205,17,20.0,6,1],[205,17,40.0,6,1],[205,17,60.0,6,0],[205,17,65.0,6,0],[205,17,65.0,6,0],[205,5,40.0,8,1],[205,5,70.0,6,0],[205,5,70.0,6,0],[205,5,70.0,6,0],[205,133,50.0,6,0],[205,133,50.0,6,0],[205,133,50.0,6,0],[205,134,0.0,8,0],[205,134,6.0,12,0],[205,134,6.0,12,0],[205,57,45.3592,6,0],[205,57,45.3592,7,0],[205,57,45.3592,8,0],[205,135,0.0,8,0],[205,135,0.0,8,0],[205,135,0.0,8,0],[205,136,null,6,0],[205,136,null,6,0],[205,136,null,6,0],[205,136,null,6,0],[205,137,null,6,0],[205,137,null,6,0],[205,137,null,6,0],[205,137,null,6,0],[206,17,20.0,6,1],[206,17,40.0,6,1],[206,17,60.0,6,0],[206,17,70.0,6,0],[206,17,70.0,7,0],[206,5,40.0,8,1],[206,5,70.0,6,0],[206,5,70.0,6,0],[206,5,70.0,6,0],[206,133,40.0,6,0],[206,133,50.0,10,0],[206,133,50.0,6,0],[206,134,50.0,15,0],[206,134,50.0,15,0],[206,134,50.0,12,0],[206,23,40.0,12,0],[206,23,40.0,10,0],[206,23,40.0,8,0],[206,135,0.0,8,0],[206,135,0.0,8,0],[206,135,0.0,8,0],[206,136,null,6,0],[206,136,null,8,0],[206,136,null,8,0],[206,136,null,8,0],[206,137,null,6,0],[206,137,null,6,0],[206,137,null,6,0],[206,137,null,6,0],[207,22,7.5,10,0],[207,22,7.5,15,0],[207,22,7.5,12,0],[207,22,7.5,12,0],[207,115,5.0,15,0],[207,115,5.0,13,0],[207,115,5.0,13,0],[208,17,40.0,6,1],[208,17,70.0,8,0],[208,17,70.0,8,0],[208,17,70.0,8,0],[208,5,70.0,8,0],[208,5,70.0,8,0],[208,5,70.0,8,0],[208,133,55.0,11,0],[208,133,55.0,10,0],[208,133,55.0,12,0],[208,134,50.0,15,0],[208,134,50.0,15,0],[208,134,50.0,12,0],[208,23,40.0,13,0],[208,23,40.0,11,0],[208,23,40.0,8,0],[208,135,0.0,10,0],[208,135,0.0,9,0],[208,135,0.0,10,0],[208,136,null,6,0],[208,136,null,8,0],[208,136,null,8,0],[208,136,null,8,0],[208,137,null,6,0],[208,137,null,6,0],[208,137,null,6,0],[208,137,null,6,0],[208,22,7.5,12,0],[208,22,7.5,14,0],[208,22,10.0,5,2],[208,22,7.5,8,0],[209,13,20.0,8,1],[209,13,40.0,6,1],[209,13,50.0,5,0],[209,13,50.0,5,0],[209,13,50.0,5,0],[209,13,50.0,5,0],[209,13,50.0,5,0],[209,135,0.0,12,0],[209,135,0.0,11,0],[209,24,0.0,6,0],[209,24,0.0,4,0],[209,24,0.0,2,0],[209,24,0.0,2,0],[209,139,12.0,10,0],[209,139,12.0,10,0],[209,139,12.0,7,0],[210,13,20.0,10,1],[210,13,40.0,8,1],[210,13,50.0,6,0],[210,13,50.0,6,0],[210,13,50.0,5,0],[210,13,50.0,4,0],[210,24,0.0,6,0],[210,24,0.0,3,0],[210,24,0.0,2,0],[210,24,0.0,1,0],[210,139,12.5,10,0],[210,139,12.5,10,0],[210,139,12.5,10,0],[210,122,12.5,6,0],[210,122,12.5,6,0],[210,122,12.5,6,0],[211,17,40.0,6,1],[211,17,70.0,8,0],[211,17,70.0,8,0],[211,17,70.0,8,0],[211,17,70.0,8,0],[212,13,20.0,8,1],[212,13,40.0,6,1],[212,13,50.0,7,0],[212,13,50.0,6,0],[212,13,50.0,4,0],[212,13,50.0,4,0],[212,24,0.0,7,0],[212,24,0.0,5,0],[212,24,0.0,3,0],[212,24,0.0,2,0],[212,139,15.0,10,0],[212,139,15.0,10,0],[212,139,15.0,8,0],[212,122,12.5,7,0],[212,122,12.5,6,0],[212,122,12.5,6,0],[213,17,40.0,8,1],[213,17,60.0,6,1],[213,17,75.0,10,0],[213,17,75.0,10,0],[213,17,75.0,10,0],[213,5,80.0,8,0],[213,5,90.0,7,0],[213,5,100.0,3,0],[214,13,40.0,8,1],[214,13,60.0,6,0],[214,13,60.0,5,0],[214,13,60.0,2,0],[214,13,50.0,4,0],[214,24,0.0,8,0],[214,24,0.0,5,0],[214,24,0.0,2,0],[214,24,0.0,1,0],[214,122,12.5,11,0],[214,122,12.5,10,0],[214,122,12.5,10,0],[214,23,30.0,10,0],[214,23,30.0,10,0],[214,23,30.0,8,0],[214,22,7.5,12,0],[214,22,7.5,10,0],[214,22,7.5,8,0],[215,17,40.0,8,1],[215,17,60.0,6,1],[215,17,80.0,10,0],[215,17,90.0,5,0],[215,17,80.0,10,0],[215,5,80.0,5,0],[215,5,90.0,8,0],[216,24,0.0,6,0],[216,24,0.0,4,0],[216,24,0.0,4,0],[216,24,0.0,4,0],[216,24,0.0,4,2],[216,24,0.0,4,2],[216,24,0.0,4,2],[216,140,null,9,0],[216,140,null,7,0],[216,140,null,6,0],[217,6,25.0,6,1],[217,6,35.0,10,0],[217,6,40.0,10,0],[217,6,45.0,8,0],[217,6,40.0,8,0],[217,13,20.0,6,1],[217,13,40.0,10,0],[217,13,50.0,8,0],[217,13,50.0,6,0],[217,61,10.0,10,0],[217,61,10.0,10,0],[217,61,10.0,10,0],[217,61,10.0,10,0],[217,22,3.0,10,1],[217,22,5.0,15,0],[217,22,5.0,15,0],[217,22,5.0,12,0],[217,22,5.0,10,0],[217,141,16.0,15,0],[217,141,16.0,15,0],[218,23,30.0,10,0],[218,23,40.0,8,0],[218,23,35.0,10,0],[218,23,35.0,8,0],[218,142,5.0,15,0],[218,142,5.0,15,0],[218,142,5.0,15,0],[218,142,5.0,15,0],[218,48,12.5,10,0],[218,48,12.5,10,0],[218,48,12.5,10,0],[218,143,30.0,10,0],[218,143,30.0,10,0],[218,143,30.0,8,0],[218,19,20.0,4,0],[218,19,15.0,5,0],[218,19,15.0,5,0],[219,6,5.0,10,1],[219,6,8.0,10,0],[219,6,8.0,10,0],[219,6,8.0,9,0],[219,6,8.0,8,0],[219,20,15.0,10,0],[219,20,15.0,10,0],[219,20,15.0,10,0],[219,144,12.5,10,0],[219,144,12.5,9,0],[219,144,12.5,9,0],[219,144,12.5,8,0],[219,74,15.0,16,0],[219,74,20.0,15,0],[219,74,20.0,15,0],[219,38,7.0,15,0],[219,38,7.0,15,0],[219,145,0.0,15,0],[219,145,0.0,15,0],[219,145,0.0,15,0],[220,6,25.0,8,1],[220,6,35.0,10,0],[220,6,40.0,10,0],[220,6,45.0,8,0],[220,6,40.0,10,0],[220,13,20.0,8,1],[220,13,40.0,10,0],[220,13,50.0,8,0],[220,13,50.0,10,0],[220,61,17.5,10,0],[220,61,17.5,10,0],[220,61,17.5,8,0],[220,61,15.0,7,0],[220,22,5.0,15,0],[220,22,5.0,15,0],[220,22,5.0,15,0],[220,22,5.0,15,0],[220,141,16.0,15,0],[220,141,16.0,15,0],[221,23,30.0,10,0],[221,23,40.0,10,0],[221,23,37.5,10,0],[221,23,37.5,10,0],[221,21,5.0,15,0],[221,21,5.0,15,0],[221,21,5.0,15,0],[221,21,5.0,15,0],[221,48,12.5,10,0],[221,48,12.5,10,0],[221,48,12.5,8,0],[221,143,30.0,10,0],[221,143,30.0,10,0],[221,143,30.0,10,0],[221,42,30.0,9,1],[221,42,50.0,10,0],[221,42,50.0,10,0],[221,42,50.0,10,0],[221,7,5.0,10,1],[221,7,10.0,10,0],[221,7,10.0,5,0],[221,7,7.5,9,0],[222,6,4.0,10,1],[222,6,8.0,10,0],[222,6,8.0,10,0],[222,6,8.0,10,0],[222,6,8.0,10,0],[222,20,15.0,11,0],[222,20,15.0,11,0],[222,20,15.0,11,0],[222,144,12.5,10,0],[222,144,12.5,10,0],[222,144,12.5,8,0],[222,144,12.5,8,0],[222,74,20.0,16,0],[222,74,20.0,16,0],[222,74,20.0,16,0],[222,146,3.0,15,0],[222,146,3.0,10,0],[222,146,2.0,10,0],[223,6,6.0,10,1],[223,6,8.0,11,0],[223,6,8.0,11,0],[223,6,8.0,11,0],[223,6,8.0,11,0],[223,13,20.0,8,1],[223,13,40.0,10,0],[223,13,50.0,10,0],[223,13,50.0,8,0],[223,144,12.5,10,0],[223,144,12.5,10,0],[223,144,12.5,10,0],[223,144,12.5,9,0],[223,22,5.0,20,0],[223,22,5.0,20,0],[223,22,5.0,15,0],[223,22,5.0,12,0],[224,23,30.0,10,0],[224,23,40.0,10,0],[224,23,40.0,10,0],[224,23,40.0,10,0],[224,21,6.0,15,0],[224,21,6.0,15,0],[224,21,6.0,15,0],[224,21,6.0,15,0],[224,48,12.5,10,0],[224,48,12.5,10,0],[224,48,12.5,11,0],[224,143,32.5,10,0],[224,143,30.0,10,0],[224,143,30.0,8,0],[224,4,3.0,15,0],[224,4,4.0,15,0],[224,4,5.0,11,0],[224,7,7.5,12,0],[224,7,7.5,12,0],[224,7,7.5,8,0],[225,6,5.0,8,1],[225,6,9.0,9,0],[225,6,9.0,9,0],[225,6,9.0,9,0],[225,6,9.0,8,0],[225,20,17.5,9,0],[225,20,17.5,10,0],[225,20,17.5,11,0],[225,74,25.0,15,0],[225,74,25.0,15,0],[225,74,25.0,11,0],[225,144,12.5,11,0],[225,144,12.5,10,0],[225,144,12.5,10,0],[225,144,12.5,12,0],[225,4,5.0,14,0],[225,4,5.0,8,0],[225,4,5.0,6,0],[225,7,7.5,12,0],[225,7,7.5,12,0],[225,7,7.5,11,0],[226,6,6.0,10,1],[226,6,9.0,10,0],[226,6,9.0,10,0],[226,6,9.0,10,0],[226,6,9.0,9,0],[226,13,20.0,8,1],[226,13,40.0,10,0],[226,13,50.0,11,0],[226,13,50.0,10,0],[226,144,12.5,12,0],[226,144,12.5,12,0],[226,144,12.5,12,0],[226,144,12.5,11,0],[226,22,5.0,20,0],[226,22,5.0,20,0],[226,22,5.0,20,0],[226,22,5.0,15,0],[226,54,7.5,12,0],[226,54,7.5,12,0],[226,54,7.5,12,0],[226,4,5.0,14,0],[226,4,5.0,11,0],[226,4,5.0,8,0],[227,23,30.0,10,0],[227,23,42.5,10,0],[227,23,42.5,10,0],[227,23,42.5,10,0],[227,21,6.0,16,0],[227,21,6.0,16,0],[227,21,6.0,16,0],[227,21,6.0,16,0],[227,78,4.0,10,1],[227,78,5.0,15,0],[227,78,6.0,15,0],[227,78,6.0,13,0],[227,4,5.0,15,0],[227,4,5.0,15,0],[227,4,5.0,13,0],[227,7,5.0,8,1],[227,7,7.5,15,0],[227,7,7.5,13,0],[227,7,7.5,11,0],[228,6,7.0,10,1],[228,6,12.0,10,0],[228,6,12.0,10,0],[228,6,12.0,10,0],[228,13,20.0,8,1],[228,13,40.0,10,0],[228,13,40.0,10,0],[228,13,40.0,10,0],[228,144,7.5,8,1],[228,144,7.5,8,0],[228,144,10.0,8,0],[228,144,10.0,8,0],[228,22,5.0,14,0],[228,22,5.0,10,0],[228,22,5.0,9,0],[228,54,7.5,12,0],[228,54,7.5,12,0],[228,54,7.5,6,0],[228,4,5.0,15,0],[228,4,5.0,10,0],[228,4,5.0,6,0],[229,17,40.0,8,1],[229,17,60.0,8,1],[229,17,90.0,5,0],[229,17,90.0,5,0],[229,42,30.0,10,1],[229,42,50.0,10,0],[229,42,70.0,6,0],[229,9,91.0,15,0],[229,9,91.0,13,0],[229,38,59.0,18,0],[229,38,59.0,11,0],[229,27,0.0,12,0],[229,27,0.0,12,0],[229,147,4.0,12,0],[229,147,7.0,20,0],[230,20,12.5,8,1],[230,20,22.5,6,0],[230,20,22.5,4,0],[230,24,0.0,5,0],[230,24,0.0,5,2],[230,22,5.0,20,0],[230,22,5.0,12,0],[230,45,30.0,5,0],[230,23,30.0,6,0],[230,148,7.5,10,0],[231,149,8.0,12,1],[231,149,10.0,8,0],[231,149,11.0,5,0],[231,149,10.0,6,0],[231,57,22.6796,6,0],[231,57,20.41164,6,0],[231,57,18.14368,7,0],[231,22,5.0,12,1],[231,22,7.5,8,0],[231,22,7.5,7,0],[231,22,7.5,6,0],[231,13,40.0,5,0],[231,21,5.0,10,0],[231,21,5.0,10,0],[231,21,5.0,12,0],[231,17,60.0,10,1],[231,17,80.0,8,0],[231,115,7.5,11,0],[231,115,7.5,5,0],[232,150,40.0,15,0],[232,150,40.0,15,0],[232,150,40.0,15,0],[232,42,20.0,12,0],[232,42,20.0,12,0],[232,42,20.0,12,0],[232,38,50.0,15,0],[232,38,54.0,15,0],[232,38,59.0,12,0],[232,22,5.0,20,0],[232,22,5.0,20,0],[232,22,5.0,15,0],[232,54,7.5,12,0],[232,54,7.5,8,0],[232,54,7.5,4,0],[233,6,36.0,8,1],[233,6,45.0,8,0],[233,6,50.0,6,0],[233,6,45.0,7,0],[233,6,50.0,5,0],[233,57,20.41164,8,0],[233,57,22.6796,5,0],[233,57,20.41164,6,0],[233,149,8.0,8,1],[233,149,12.0,8,0],[233,149,12.0,7,0],[233,149,12.0,6,0],[233,22,5.0,20,0],[233,22,5.0,20,0],[233,22,5.0,15,0],[234,1,0.0,8,0],[234,1,0.0,7,0],[234,1,0.0,6,0],[234,26,0.0,3,0],[234,26,0.0,3,2],[234,26,0.0,2,2],[234,122,10.0,10,0],[234,122,10.0,6,0],[234,122,10.0,5,0],[234,148,5.5,15,0],[234,148,5.5,15,0],[234,148,5.5,15,0],[234,22,5.5,13,0],[234,22,5.5,12,0],[234,22,5.5,10,0],[234,79,12.0,7,0],[234,79,12.0,3,0],[234,79,10.0,4,0],[235,24,0.0,1,0],[235,24,0.0,1,0],[235,24,0.0,1,0],[235,140,null,1,0],[235,140,null,1,0],[235,140,null,1,0],[235,139,15.0,1,0],[235,139,15.0,1,0],[235,139,15.0,1,0],[235,148,6.0,1,0],[235,148,6.0,1,0],[235,148,6.0,1,0],[235,7,7.5,1,0],[235,7,7.5,1,2],[236,24,0.0,8,2],[236,24,0.0,8,2],[236,24,0.0,5,2],[236,140,null,9,0],[236,140,null,10,0],[236,140,null,9,0],[236,139,15.0,10,0],[236,139,15.0,9,0],[236,139,15.0,9,0],[236,148,6.0,20,0],[236,148,6.0,20,0],[236,148,6.0,20,0],[236,7,7.5,12,0],[236,7,7.5,8,2],[237,1,0.0,10,0],[237,1,0.0,9,0],[237,1,0.0,8,0],[237,37,15.0,10,0],[237,37,15.0,10,0],[237,37,15.0,10,0],[237,122,10.0,10,0],[237,122,10.0,10,0],[237,122,10.0,10,0],[237,22,5.0,15,0],[237,22,5.0,15,0],[237,135,0.0,7,0],[237,135,0.0,6,0],[238,24,0.0,3,2],[238,24,0.0,2,2],[238,1,0.0,8,0],[238,1,0.0,8,0],[238,1,0.0,8,0],[238,135,0.0,7,0],[238,135,0.0,6,0],[238,135,0.0,6,0],[238,140,null,9,0],[238,140,null,10,0],[238,140,null,9,0]]}</script>
+<script id="extra" type="application/json">[{"t": "2026-09-21T19:00", "name": "Torso A", "sets": [["Bench Press (Dumbbell)", 17.5, 12, 0, 2], ["Bench Press (Dumbbell)", 17.5, 10, 0, 2], ["Seated Overhead Press (Dumbbell)", 10, 8, 1, 3], ["Lat Pulldown (Cable)", 41, 8, 0, 4], ["Seated Row (Machine)", 36, 10, 1, 3], ["Lateral Raise (Dumbbell)", 5, 15, 0, 3], ["Triceps Extension (Rope, 5 placas)", null, 10, 1, 3], ["Roman Chair Sit-up", null, 10, 1, 2]]}, {"t": "2026-09-22T19:00", "name": "Pierna A", "sets": [["Squat (Barbell)", 70, 10, 0, 4], ["Leg Extension (Machine)", 61, 12, 1, 3], ["Seated Leg Curl (Machine)", 45, 12, 1, 3]]}, {"t": "2026-09-24T07:15", "name": "Torso B", "sets": [["Incline Chest Press (Machine)", 9, 8, 0, 2], ["Incline Chest Press (Machine)", 9, 6, 0, 1], ["Lat Pulldown (Cable)", 45, 8, 0, 2], ["Lat Pulldown (Cable)", 45, 6, 0, 1], ["Lat Pulldown (Cable)", 45, 5, 0, 1], ["Lateral Raise (Dumbbell)", 5, 15, 0, 3], ["Face Pull (Cable)", 6, 15, 0, 1], ["Face Pull (Cable)", 7, 15, 0, 1], ["Face Pull (Cable)", 7, 12, 0, 1], ["Bicep Curl (Dumbbell)", 7.5, 8, 0, 1], ["Bicep Curl (Dumbbell)", 7.5, 6, 0, 1], ["Bicep Curl (Dumbbell)", 7.5, 5, 0, 1]]}]</script>
+<script>
+(function(){
+"use strict";
+const APP_VER="2.0.0";
+const LS="fierro_pwa_v1";
+const DAY=864e5;
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt1=v=>String(Math.round(v*100)/100).replace(".",",");
+const fmtD=t=>new Date(t).toLocaleDateString("es-CL",{day:"numeric",month:"short",year:"numeric"});
+const fmtDs=t=>new Date(t).toLocaleDateString("es-CL",{weekday:"short",day:"numeric",month:"short"});
+const fmtM=t=>new Date(t).toLocaleDateString("es-CL",{month:"short",year:"2-digit"});
+const num=v=>{if(v===""||v==null)return null;const n=parseFloat(String(v).replace(",","."));return isNaN(n)?null:n;};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const mmss=s=>{s=Math.max(0,Math.round(s));const h=Math.floor(s/3600);const m=Math.floor(s%3600/60);return(h?h+":"+String(m).padStart(2,"0"):m)+":"+String(s%60).padStart(2,"0");};
+const parseRest=v=>{if(typeof v==="number")return v;const m=String(v).match(/(\d+):(\d+)/);return m?(+m[1]*60+ +m[2]):(parseInt(v)||90);};
+const roundTo=(v,s)=>Math.round(v/s)*s;
+function weekStart(t){const d=new Date(t);d.setHours(0,0,0,0);return d.getTime()-((d.getDay()+6)%7)*DAY;}
+function toast(m,ms=2600){const t=$("#toast");t.textContent=m;t.style.display="block";clearTimeout(toast._t);toast._t=setTimeout(()=>t.style.display="none",ms);}
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+/* ================= diccionario de ejercicios ================= */
+const MUSCLES=["Pecho","Espalda","Hombro","Bíceps","Tríceps","Cuádriceps","Isquios","Glúteos","Gemelos","Core"];
+const MCOL={"Pecho":"--red","Espalda":"--blue","Hombro":"--yellow","Bíceps":"--purple","Tríceps":"--orange","Cuádriceps":"--green","Isquios":"--teal","Glúteos":"--teal","Gemelos":"--slate","Core":"--slate"};
+const TYPES={free:"Peso libre o máquina",bw:"Peso corporal + lastre",assist:"Peso corporal con asistencia",time:"Isométrico (tiempo)"};
+function autoMeta(name){
+  const n=" "+String(name).toLowerCase()+" ";const has=(...a)=>a.some(s=>n.includes(s));
+  let type="free",f=1;
+  if(has("plank","plancha","hollow","isometr"," hold","l-sit","wall sit"))type="time";
+  else if(has("assisted","asistid"))type="assist";
+  else if(has("pull up","pull-up","chin up","chin-up","dominada","chest dip"," dip ","fondos","muscle up"))type="bw";
+  else if(has("push up","push-up","flexiones")){type="bw";f=.64;}
+  else if(has("inverted row")){type="bw";f=.6;}
+  let p=null,s=[];
+  if(has("jump","pogo","skater","skip","salto","knee drive","walking ","cycling","running","sprint","cajón"))p=null;
+  else if(has("plank","plancha","crunch","ab wheel","knee raise","leg raise","sit up","sit-up","roman chair","abdominal","hollow","cable crunch"))p="Core";
+  else if(has("back extension"))p="Isquios",s=["Glúteos"];
+  else if(has("leg curl","femoral"))p="Isquios";
+  else if(has("leg extension","cuádriceps"))p="Cuádriceps";
+  else if(has("calf","gemelo"))p="Gemelos";
+  else if(has("hip thrust","glute","abductor"))p="Glúteos",s=["Isquios"];
+  else if(has("romanian","rdl","rumano","stiff leg","good morning"))p="Isquios",s=["Glúteos","Espalda"];
+  else if(has("deadlift","peso muerto"))p="Glúteos",s=["Isquios","Espalda","Cuádriceps"];
+  else if(has("squat","sentadilla","leg press","prensa","lunge","zancada","split","búlgara","hack","step up"))p="Cuádriceps",s=["Glúteos"];
+  else if(has("adductor","aductor"))p=null;
+  else if(has("tricep","tríceps","pushdown","skullcrusher","kickback","french press","katana"))p="Tríceps";
+  else if(has("curl","bicep","bíceps"," 21 "))p="Bíceps";
+  else if(has("lateral","face pull","reverse pec","reverse fly","rear delt","upright","y raise","posteriores","front raise"))p="Hombro";
+  else if(has("shoulder press","military","overhead press","arnold","press hombro","press militar"))p="Hombro",s=["Tríceps"];
+  else if(has("shrug"))p="Espalda";
+  else if(has("row","remo","inverted"))p="Espalda",s=["Bíceps","Hombro"];
+  else if(has("pulldown","jalón","jalon","pull up","pull-up","dominada","chin up","lat ","pullover","jale","prayer","pull-around"))p="Espalda",s=["Bíceps"];
+  else if(has("fly","crossover","croesover","pec deck","apertura"))p="Pecho",s=["Hombro"];
+  else if(has("dip","fondo"))p="Pecho",s=["Tríceps","Hombro"];
+  else if(has("bench","chest","push up","push-up","flexiones","supino","pechito","banca","press inclinado"))p="Pecho",s=["Hombro","Tríceps"];
+  return{type,f,p,s};
+}
+function meta(name){const o=(S&&S.exMeta&&S.exMeta[name])||{};return{...autoMeta(name),...o};}
+const groupColor=n=>{const m=meta(n);return m.p?`var(${MCOL[m.p]})`:"var(--slate)";};
+const isBarbell=n=>/barbell|barra\b|smith/i.test(n);
+
+/* ================= carga efectiva y 1RM ================= */
+function bwAt(t){const L=(S.bw||[]).filter(x=>!x.del).sort((a,b)=>a.t-b.t);if(!L.length)return null;let v=L[0].kg;for(const x of L){if(x.t<=t)v=x.kg;else break;}return v;}
+function loadOf(name,w,t){const m=meta(name);
+  if(m.type==="bw"){const b=bwAt(t);return b==null?(w||0):m.f*b+(w||0);}
+  if(m.type==="assist"){const b=bwAt(t);return b==null?null:Math.max(0,m.f*b-(w||0));}
+  if(m.type==="time")return null;
+  return w;}
+// Brzycki ≤5 reps, Epley 6–10, >10 poco fiable. RIR suma reps hasta el fallo.
+function e1(load,reps,rir){const n=(reps||0)+(rir||0);if(!load||n<=0)return{v:0,low:false};
+  if(n===1)return{v:load,low:false};
+  if(n<=5)return{v:load*36/(37-n),low:false};
+  return{v:load*(1+n/30),low:n>10};}
+const setE=(name,x,t)=>e1(loadOf(name,x.w,t),x.r,x.rir);
+function loadForReps(E,n){return n<=5?E*(37-n)/36:E/(1+n/30);}
+
+/* ================= rutina por defecto ================= */
+const DEFAULT_ROUTINE=[
+ {k:"Torso A",dow:1,items:[
+  {n:"Press banca o plano con mancuernas",c:["Bench Press (Dumbbell)","Bench Press (Barbell)"],s:4,lo:6,hi:8,rir:2,rest:150,main:1},
+  {n:"Press hombro sentado",c:["Seated Overhead Press (Dumbbell)","Shoulder Press (Machine)","Overhead Press (Dumbbell)"],s:3,lo:8,hi:10,rir:2,rest:120},
+  {n:"Dominadas o jalón al pecho",c:["Lat Pulldown (Cable)","Pull Up","Pull Up (Assisted)","Chin Up"],s:4,lo:6,hi:10,rir:2,rest:120},
+  {n:"Remo",c:["Seated Row (Machine)","Bent Over One Arm Row (Dumbbell)","Seated Row (Cable)"],s:3,lo:10,hi:12,rir:2,rest:90},
+  {n:"Elevaciones laterales",c:["Lateral Raise (Dumbbell)","Lateral Raise (Cable)"],s:3,lo:12,hi:15,rir:1,rest:60},
+  {n:"Fondos o extensión de tríceps",c:["Chest Dip","Triceps Extension (Rope, 5 placas)","Triceps Pushdown (Cable - Straight Bar)"],s:3,lo:8,hi:12,rir:2,rest:90},
+  {n:"Finisher",fixed:"8–9 rondas de 20 s fuerte / 40 s suave",why:"Bici o cuerda."}]},
+ {k:"Pierna A",dow:2,items:[
+  {n:"Saltos al cajón",fixed:"4×4",why:"Primero y fresco. Calidad y altura, nunca al fallo."},
+  {n:"Sentadilla",c:["Squat (Barbell)","Squat (Smith Machine)"],s:4,lo:6,hi:8,rir:2,rest:180,main:1},
+  {n:"Prensa",c:["Leg Press","Seated Leg Press (Machine)"],s:3,lo:10,hi:12,rir:2,rest:120},
+  {n:"Búlgaras (por pierna)",c:["Bulgarian Split Squat"],s:3,lo:8,hi:10,rir:2,rest:90},
+  {n:"Extensión de cuádriceps",c:["Leg Extension (Machine)"],s:3,lo:12,hi:15,rir:1,rest:90},
+  {n:"Gemelos",c:["Seated Calf Raise (Machine)","Standing Calf Raise (Dumbbell)","Calf Press on Seated Leg Press"],s:4,lo:12,hi:15,rir:1,rest:60}]},
+ {k:"Torso B",dow:3,items:[
+  {n:"Dominadas con lastre o jalón",c:["Lat Pulldown (Cable)","Pull Up","Chin Up"],s:4,lo:6,hi:8,rir:2,rest:150,main:1},
+  {n:"Remo con barra",c:["Bent Over Row (Barbell)","Seated Row (Machine)","T Bar Row"],s:4,lo:8,hi:10,rir:2,rest:120},
+  {n:"Press inclinado",c:["Incline Chest Press (Machine)","Incline Bench Press (Dumbbell)","Incline Bench Press (Barbell)"],s:3,lo:8,hi:10,rir:2,rest:120},
+  {n:"Face pull o aperturas posteriores",c:["Face Pull (Cable)","reverse pec deck","Reverse Fly (Dumbbell)"],s:3,lo:12,hi:15,rir:1,rest:90},
+  {n:"Curl de bíceps",c:["Bicep Curl (Dumbbell)","Bicep Curl (Barbell)","hammer preacher curl","Preacher Curl (Machine)","bayesian cable curl"],s:3,lo:10,hi:12,rir:1,rest:120,tip:"Descansa completo: tu bíceps se fatiga rápido."},
+  {n:"Elevaciones laterales",c:["Lateral Raise (Dumbbell)","Lateral Raise (Cable)"],s:3,lo:12,hi:15,rir:1,rest:60},
+  {n:"Finisher",fixed:"8–9 rondas de 20 s fuerte / 40 s suave",why:"Igual que el lunes."}]},
+ {k:"Pierna B",dow:4,items:[
+  {n:"Peso muerto rumano",c:["Romanian Deadlift (Barbell)","Romanian Deadlift (Dumbbell)"],s:4,lo:8,hi:10,rir:2,rest:150,main:1},
+  {n:"Hip thrust",c:["Hip Thrust (Barbell)"],s:3,lo:10,hi:12,rir:2,rest:120},
+  {n:"Curl femoral",c:["Seated Leg Curl (Machine)","Lying Leg Curl (Machine)"],s:3,lo:12,hi:15,rir:1,rest:90},
+  {n:"Zancadas caminando (por pierna)",c:["Walking Lunge (Dumbbell)","smith machine lunge"],s:3,lo:10,hi:12,rir:2,rest:90},
+  {n:"Gemelos",c:["Seated Calf Raise (Machine)","Standing Calf Raise (Dumbbell)","Calf Press on Seated Leg Press"],s:3,lo:12,hi:15,rir:1,rest:60},
+  {n:"Plancha",c:["Plank"],s:3,time:45,rest:60}]}
+];
+
+/* ================= estado ================= */
+let S=null;
+function seedState(){
+  const j=JSON.parse($("#seed").textContent);const ex=JSON.parse($("#extra").textContent);
+  const sessions=[];const byId={};
+  Object.keys(j.s).forEach(id=>{const v=j.s[id];const t=new Date(v[0].replace(" ","T")).getTime();
+    const s={id:"st"+id,t,end:t+(v[2]||0)*1000,name:v[1],u:0,ex:[]};byId[id]=s;sessions.push(s);});
+  j.x.forEach(x=>{const s=byId[x[0]];if(!s)return;const name=j.e[x[1]];let last=s.ex[s.ex.length-1];
+    if(!last||last.n!==name){last={n:name,sets:[]};s.ex.push(last);}last.sets.push({w:x[2],r:x[3],k:x[4]===1?1:(x[4]===2?2:0)});});
+  const days=new Set(sessions.map(s=>new Date(s.t).toDateString()));
+  ex.forEach((e,i)=>{const t=new Date(e.t).getTime();if(days.has(new Date(t).toDateString()))return;
+    const s={id:"m"+i,t,end:t+3600e3,name:e.name,u:0,ex:[]};
+    e.sets.forEach(([n,w,r,a,k])=>{let last=s.ex[s.ex.length-1];if(!last||last.n!==n){last={n,sets:[]};s.ex.push(last);}for(let q=0;q<k;q++){const o={w,r,k:0};if(a)o.a=1;last.sets.push(o);}});
+    sessions.push(s);});
+  sessions.sort((a,b)=>a.t-b.t);
+  return{v:2,sessions,routine:JSON.parse(JSON.stringify(DEFAULT_ROUTINE)),ru:0,active:null,bw:[],exMeta:{},mu:0,
+    settings:{wake:true,sound:true,loop:true,defaultRest:90,theme:"dark",bar:20,plates:[25,20,15,10,5,2.5,1.25]}};
+}
+function migrate(s){
+  if(!s.v||s.v<2){
+    s.bw=s.bw||[];s.exMeta=s.exMeta||{};s.mu=s.mu||0;
+    if(!s.ru)s.routine=JSON.parse(JSON.stringify(DEFAULT_ROUTINE));
+    s.settings={loop:true,theme:"dark",bar:20,plates:[25,20,15,10,5,2.5,1.25],...s.settings};
+    s.v=2;
+  }
+  return s;
+}
+function load(){try{const r=localStorage.getItem(LS);if(r){const s=JSON.parse(r);if(s&&s.sessions)return migrate(s);}}catch(e){}return seedState();}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){toast("No se pudo guardar en el teléfono. Descarga un respaldo.");}}
+const live=()=>S.sessions.filter(s=>!s.del);
+
+/* ================= historial y recomendación ================= */
+function historyOf(name,excl){
+  const out=[];for(const s of live()){if(s.id===excl)continue;for(const e of s.ex){if(e.n!==name)continue;const w=e.sets.filter(x=>x.k!==1&&(x.r>0||x.w||x.sec));if(w.length)out.push({t:s.t,sets:w});}}
+  return out.sort((a,b)=>a.t-b.t);}
+function lastOf(name,excl){const h=historyOf(name,excl);return h.length?h[h.length-1]:null;}
+function bestE(name,excl){let b=0;historyOf(name,excl).forEach(h=>h.sets.forEach(x=>{const v=setE(name,x,h.t).v;if(v>b)b=v;}));return b;}
+function stepFor(name,w){const n=name.toLowerCase();
+  if(/dumbbell|mancuerna|\bdb\b/.test(n))return 2.5;
+  if(/barbell|smith|barra/.test(n))return /squat|deadlift|rdl|hip thrust|lunge|sentadilla|rumano/.test(n)?5:2.5;
+  if(/cable|face pull|rope|placas|polea/.test(n)&&w<15)return 1;
+  return 2.5;}
+const setTxt=(x,name)=>{const m=meta(name);if(m.type==="time")return`${x.sec||x.r||0} s`;
+  const w=x.w?(m.type==="bw"?"+":m.type==="assist"?"−":"")+fmt1(x.w):(m.type==="bw"?"PC":"—");
+  return`${w}×${x.r}${x.rir!=null?"@"+x.rir:""}`;};
+function recommend(it,ex,excl){
+  const m=meta(ex);const L=lastOf(ex,excl);const mid=Math.round((it.lo+it.hi)/2);
+  const base={L,lastTxt:L?`${fmtD(L.t)}: `+L.sets.map(x=>setTxt(x,ex)).join(", "):""};
+  const rows=(w,r)=>Array.from({length:it.s||3},()=>({w,r}));
+  if(m.type==="time"){const goal=it.time||45;
+    if(!L)return{...base,badge:["new","Sin registro"],why:`Apunta a ${goal} s por serie.`,rows:rows(null,0).map(r=>({...r,sec:goal}))};
+    const secs=L.sets.map(x=>x.sec||x.r||0);const mn=Math.min(...secs);
+    const next=mn>=goal?Math.max(goal,mn)+10:Math.min(goal,mn+5);
+    return{...base,badge:[mn>=goal?"up":"keep",mn>=goal?"Sube":"Mantén"],why:mn>=goal?`Aguantaste ${secs.join("-")} s. Sube a ${next} s.`:`Hiciste ${secs.join("-")} s. Busca ${next} s en cada serie.`,rows:rows(null,0).map(r=>({...r,sec:next}))};}
+  if(!L)return{...base,badge:["new","Sin registro"],why:"Parte liviano, con 3 reps en reserva. Lo que anotes hoy será tu base.",rows:rows(null,it.lo)};
+  const w0=Math.max(...L.sets.map(x=>x.w||0));
+  const top=L.sets.filter(x=>(x.w||0)===w0);const reps=top.map(x=>x.r);
+  const rirs=top.map(x=>x.rir).filter(v=>v!=null);
+  const plus1=w=>Array.from({length:it.s},(_,i)=>({w,r:Math.min(it.hi,(reps[i]??reps[reps.length-1])+1)}));
+  const days=(Date.now()-L.t)/DAY;const assumed=L.sets.some(x=>x.a);
+  const allTop=reps.every(r=>r>=it.hi)&&!assumed;
+  const tooEasy=!assumed&&rirs.length===top.length&&Math.min(...rirs)>=it.rir+2&&reps.every(r=>r>=it.lo);
+  const E=Math.max(0,...L.sets.map(x=>setE(ex,x,L.t).v));
+  const rirNote=tooEasy&&!allTop?` Anotaste RIR ${Math.min(...rirs)}: te sobraban reps.`:"";
+  /* ---- peso corporal + lastre ---- */
+  if(m.type==="bw"||m.type==="assist"){
+    const b=bwAt(Date.now());
+    if(b==null){return{...base,badge:["keep","Falta tu peso"],why:"Anota tu peso corporal en Ajustes para calcular la carga real. Por ahora: 1 rep más por serie.",rows:plus1(w0||null)};}
+    const bodyPart=m.f*b;
+    if(days>60)return{...base,badge:["new","Retomando"],why:`Tu último registro es de hace ${Math.round(days/30)} meses. ${m.type==="assist"?`Parte con ${fmt1(w0+5)} kg de asistencia`:"Parte sin lastre"} y anota lo que salga con buena técnica, dejando 2–3 en reserva.`,rows:rows(m.type==="assist"?w0+5:null,it.lo)};
+    if(allTop||tooEasy){
+      let eff=loadForReps(E,mid+it.rir);let w;
+      if(m.type==="bw"){w=Math.max(roundTo(eff-bodyPart,2.5),w0+2.5);return{...base,badge:["up","Sube"],why:`Completaste ${reps.join("-")}.${rirNote} Lastre de ${fmt1(w)} kg: carga real ≈ ${fmt1(Math.round(bodyPart+w))} kg.`,rows:rows(w,it.lo)};}
+      w=Math.max(0,Math.min(roundTo(bodyPart-eff,2.5),w0-2.5));return{...base,badge:["up","Sube"],why:`Completaste ${reps.join("-")}.${rirNote} Baja la asistencia a ${fmt1(w)} kg${w===0?": sin asistencia":""}.`,rows:rows(w||null,it.lo)};}
+    if(reps[0]<it.lo-2){
+      if(m.type==="bw"&&w0>0)return{...base,badge:["down","Baja"],why:`Con +${fmt1(w0)} kg quedaste bajo el rango. Baja a +${fmt1(Math.max(0,w0-2.5))} kg.`,rows:rows(Math.max(0,w0-2.5)||null,it.lo)};
+      if(m.type==="assist")return{...base,badge:["down","Baja"],why:`Quedaste bajo el rango. Sube la asistencia a ${fmt1(w0+5)} kg.`,rows:rows(w0+5,it.lo)};
+      return{...base,badge:["down","Baja"],why:`Sin lastre quedaste bajo el rango (${reps.join("-")}). Usa asistencia o el jalón en polea.`,rows:plus1(null)};}
+    return{...base,badge:["keep","Mantén"],why:`Hiciste ${reps.join("-")}. Misma carga, 1 rep más en las series bajo ${it.hi}. Carga real ≈ ${fmt1(Math.round(m.type==="bw"?bodyPart+w0:bodyPart-w0))} kg.`,rows:plus1(w0||null)};
+  }
+  /* ---- peso libre / máquina ---- */
+  if(!w0)return{...base,badge:["keep","Anota el peso"],why:"La vez pasada no quedó el peso. Usa el mismo y anótalo hoy.",rows:plus1(null)};
+  const step=stepFor(ex,w0);
+  if(days>60){const w=Math.max(step,roundTo(0.8*loadForReps(E,mid+3),step));
+    return{...base,badge:["new","Retomando"],why:`Tu último registro es de hace ${Math.round(days/30)} meses. Parte con ${fmt1(w)} kg dejando 3 en reserva.`,rows:rows(w,it.lo)};}
+  if(allTop||tooEasy){
+    let w=roundTo(loadForReps(E,mid+it.rir),step);w=Math.max(w,w0+step);w=Math.min(w,w0+2*step);
+    if((w-w0)/w0>0.25){const r=rows(w0,it.hi);r[0]={w,r:Math.max(6,it.lo-4)};
+      return{...base,badge:["split","Salto grande"],why:`De ${fmt1(w0)} a ${fmt1(w)} kg es +${Math.round((w-w0)/w0*100)}%. Primera serie con ${fmt1(w)} kg (${Math.max(6,it.lo-4)}–${it.lo} reps) y el resto con ${fmt1(w0)}. Cuando saques ${it.lo} con ${fmt1(w)}, pasa dos series a ese peso.`,rows:r};}
+    const over=reps[0]>=it.hi+3;
+    return{...base,badge:["up","Sube"],why:(over?`Sacaste ${reps.join("-")} con ${fmt1(w0)} kg, muy sobre el rango. Tu 1RM estimado ronda ${fmt1(Math.round(E*10)/10)} kg: ${fmt1(w)} kg te deja en ${it.lo}–${it.hi} con RIR ${it.rir}.`:allTop?`Completaste el tope (${reps.join("-")}). Sube a ${fmt1(w)} kg y vuelve a ${it.lo}.`:`Sube a ${fmt1(w)} kg.`)+rirNote,rows:rows(w,it.lo)};}
+  if(reps[0]<it.lo-2){const w=Math.max(step,w0-step);return{...base,badge:["down","Baja"],why:`Con ${fmt1(w0)} kg quedaste bajo el rango (${reps.join("-")}). Baja a ${fmt1(w)} kg.`,rows:rows(w,it.lo)};}
+  if(assumed)return{...base,badge:["keep","Mantén"],why:"Mismo peso. Las reps de la vez pasada no quedaron anotadas; hoy anota las reales.",rows:rows(w0,it.lo)};
+  return{...base,badge:["keep","Mantén"],why:`Hiciste ${reps.join("-")}. Mismo peso, 1 rep más en las series que no llegaron a ${it.hi}.`,rows:plus1(w0)};
+}
+function pickVariant(it,excl){const withH=it.c.map(c=>({c,L:lastOf(c,excl)})).filter(x=>x.L);if(!withH.length)return it.c[0];withH.sort((a,b)=>b.L.t-a.L.t);return withH[0].c;}
+function nextDay(){
+  const now=new Date();const trained=live().some(s=>new Date(s.t).toDateString()===now.toDateString());
+  const d=new Date(now);if(trained)d.setDate(d.getDate()+1);
+  for(let i=0;i<7;i++){const k=S.routine.find(r=>r.dow===d.getDay());if(k)return{k:k.k,date:new Date(d)};d.setDate(d.getDate()+1);}
+  return{k:S.routine[0]?.k,date:d};}
+
+/* ================= navegación ================= */
+let view="train";let pickDay=null;
+function go(v){view=v;$$("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));render();window.scrollTo(0,0);}
+$$("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.v));
+function render(){({train:renderTrain,history:renderHistory,progress:renderProgress,routine:renderRoutine,settings:renderSettings})[view]();syncBadge();renderDock();}
+
+/* ================= ENTRENAR ================= */
+function summarizeRows(rows,ex){const m=meta(ex);
+  if(m.type==="time")return`${rows.length}× ${rows[0].sec} s`;
+  const lab=w=>w==null?(m.type==="bw"?"peso corporal":"—"):(m.type==="bw"?"+"+fmt1(w)+" kg":m.type==="assist"?"asist. "+fmt1(w)+" kg":fmt1(w)+" kg");
+  const g=[];rows.forEach(r=>{const k=lab(r.w);const l=g[g.length-1];if(l&&l.k===k)l.n++;else g.push({k,n:1});});
+  return g.map(x=>`${x.n}× ${x.k}`).join(" + ");}
+function renderTrain(){
+  if(S.active)return renderActive();
+  const nd=nextDay();if(!pickDay||!S.routine.find(r=>r.k===pickDay))pickDay=nd.k;
+  const day=S.routine.find(r=>r.k===pickDay);
+  let h="";
+  const lb=S.settings.lastBackup||0;const nSess=live().length;
+  if(nSess&&Date.now()-lb>14*DAY&&!S.settings.token)h+=`<div class="banner"><span class="grow small">${lb?`Tu último respaldo fue hace ${Math.floor((Date.now()-lb)/DAY)} días.`:"Aún no descargas un respaldo de tus datos."} Todo vive solo en este teléfono.</span><button class="btn small" id="bk">Respaldar</button></div>`;
+  h+=`<div class="chips" role="group" aria-label="Día">${S.routine.map(r=>`<button class="chip" aria-pressed="${r.k===pickDay}" data-day="${esc(r.k)}">${esc(r.k)}</button>`).join("")}</div>`;
+  h+=`<p class="muted" style="margin:10px 0 12px">${pickDay===nd.k?"Próxima sesión: "+nd.date.toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long"}):"Otro día de la rutina"}</p>`;
+  h+=`<h2 style="margin-top:4px">Lo que toca</h2>`;
+  if(day)day.items.forEach(it=>{
+    if(it.fixed){h+=`<div class="card" style="--gc:var(--slate)"><h3>${esc(it.n)}</h3><p class="why"><b>${esc(it.fixed)}</b> · ${esc(it.why||"")}</p></div>`;return;}
+    const ex=pickVariant(it);const R=recommend(it,ex);const m=meta(ex);
+    h+=`<div class="card" style="--gc:${groupColor(ex)}"><h3>${esc(it.n)}</h3><div class="small muted">${esc(ex)}</div><p class="why" style="font-size:17px;margin-top:6px"><b>${summarizeRows(R.rows,ex)}</b>${m.type==="time"?"":` · ${it.lo===it.hi?it.lo:it.lo+"–"+it.hi} reps · RIR ${it.rir}`}</p><p class="why"><span class="badge b-${R.badge[0]}">${R.badge[1]}</span>${esc(R.why)}</p>${R.lastTxt?`<p class="last">Última vez ${esc(R.lastTxt)}</p>`:""}</div>`;});
+  h+=`<div style="height:8px"></div>`;
+  $("#view").innerHTML=h;
+  $$("[data-day]").forEach(b=>b.onclick=()=>{pickDay=b.dataset.day;renderTrain();renderDock();});
+  const bk=$("#bk");if(bk)bk.onclick=backupJSON;
+}
+function startSession(dayKey,editing){
+  if(editing){const s=S.sessions.find(x=>x.id===editing);S.active={id:s.id,editing:true,t:s.t,end:s.end,name:s.name,notes:s.notes,ex:s.ex.map(e=>({...e,sets:e.sets.map(x=>({...x,done:true}))}))};save();go("train");return;}
+  const day=S.routine.find(r=>r.k===dayKey);
+  const act={id:uid(),t:Date.now(),name:dayKey||"Entrenamiento libre",ex:[]};
+  if(day)day.items.forEach(it=>{
+    if(it.fixed){act.ex.push({n:it.n,fixed:it.fixed,note:it.why,sets:[]});return;}
+    act.ex.push(buildEx(it,pickVariant(it),act.id));});
+  S.active=act;save();wake(true);renderTrain();renderDock();
+}
+function buildEx(it,ex,excl){const R=recommend(it,ex,excl);const m=meta(ex);
+  return{n:ex,slot:it.n,c:it.c,it:{s:it.s||3,lo:it.lo,hi:it.hi,rir:it.rir,rest:it.rest,main:it.main,tip:it.tip,time:it.time},rec:{b:R.badge,why:R.why,last:R.lastTxt},
+    sets:R.rows.map(r=>m.type==="time"?{sec:r.sec,k:0,sug:1}:{w:r.w,r:r.r,k:0,sug:1})};}
+function prevSetTxt(e,idx,excl){const L=lastOf(e.n,excl);if(!L)return"";const x=L.sets[idx];return x?setTxt(x,e.n):"";}
+function renderActive(){
+  const A=S.active;
+  let h=`<div class="row" style="margin-bottom:10px"><h2 class="grow" style="margin:0">${esc(A.name)}</h2>${A.editing?`<span class="small muted">Editando</span>`:""}</div>`;
+  A.ex.forEach((e,i)=>{
+    if(e.fixed){h+=`<div class="card" style="--gc:var(--slate)"><div class="top"><h3>${esc(e.n)}</h3><button class="del" data-rmex="${i}" aria-label="Quitar">×</button></div><p class="why"><b>${esc(e.fixed)}</b> · ${esc(e.note||"")}</p></div>`;return;}
+    const m=meta(e.n);const variants=(e.c||[]).slice();if(!variants.includes(e.n))variants.unshift(e.n);
+    const idxWork=[];let wi=0;e.sets.forEach(s=>idxWork.push(s.k===1?-1:wi++));
+    const L=lastOf(e.n,A.id);
+    const tools=[];if(isBarbell(e.n)&&m.type==="free")tools.push(`<button class="tool" data-plates="${i}">Discos</button>`);
+    h+=`<div class="card" style="--gc:${groupColor(e.n)}"><div class="top"><div class="grow" style="min-width:0">${e.slot?`<h3>${esc(e.slot)}</h3>`:`<h3>${esc(e.n)}</h3>`}
+      ${variants.length>1?`<select class="variant" data-var="${i}" aria-label="Variante">${variants.map(v=>`<option ${v===e.n?"selected":""}>${esc(v)}</option>`).join("")}</select>`:(e.slot?`<div class="small muted">${esc(e.n)}</div>`:"")}
+      </div><div class="row" style="gap:4px;flex-wrap:nowrap">${tools.join("")}<button class="del" data-rmex="${i}" aria-label="Quitar ejercicio">×</button></div></div>
+      ${e.rec?`<p class="why"><span class="badge b-${e.rec.b[0]}">${esc(e.rec.b[1])}</span>${esc(e.rec.why)}</p>`:""}
+      ${e.it&&e.it.tip?`<p class="why">${esc(e.it.tip)}</p>`:""}
+      ${e.it?`<p class="last">${m.type==="time"?"":`${e.it.lo===e.it.hi?e.it.lo:e.it.lo+"–"+e.it.hi} reps · RIR ${e.it.rir} · `}descanso ${mmss(parseRest(e.it.rest||S.settings.defaultRest))}${m.type==="bw"?" · kg = lastre":m.type==="assist"?" · kg = asistencia":""}</p>`:""}`;
+    if(m.type==="time"){
+      h+=`<table class="sets"><colgroup><col style="width:44px"><col style="width:26%"><col><col style="width:52px"><col style="width:52px"></colgroup><thead><tr><th>SERIE</th><th>ANTERIOR</th><th>SEG</th><th></th><th>✓</th></tr></thead><tbody>`;
+      e.sets.forEach((s,j)=>{const pv=L&&L.sets[idxWork[j]]?setTxt(L.sets[idxWork[j]],e.n):"";
+        h+=`<tr class="${s.done?"ok":""} ${s.fb?"fb-"+s.fb:""}"><td><span class="lbl">${j+1}</span>${s.fb==="pr"?`<span class="prtag">PR</span>`:""}</td><td class="prev">${esc(pv)}</td>
+        <td><input class="${s.sug&&!s.done?"sug":""}" inputmode="numeric" data-sec="${i}.${j}" value="${s.sec||""}" aria-label="Segundos"></td>
+        <td><button class="play" data-watch="${i}.${j}" aria-label="Cronómetro">▶</button></td>
+        <td><button class="check" data-ok="${i}.${j}" aria-label="Serie hecha">✓</button></td></tr>`;});
+    }else{
+      const kgLabel=m.type==="bw"?"+KG":m.type==="assist"?"ASIST.":"KG";
+      h+=`<table class="sets"><colgroup><col style="width:40px"><col style="width:22%"><col><col><col style="width:40px"><col style="width:50px"></colgroup><thead><tr><th>SERIE</th><th>ANTERIOR</th><th>${kgLabel}</th><th>REPS</th><th>RIR</th><th>✓</th></tr></thead><tbody>`;
+      let n=0;
+      e.sets.forEach((s,j)=>{const lbl=s.k===1?"W":s.k===2?"D":(++n);const pv=idxWork[j]>=0&&L&&L.sets[idxWork[j]]?setTxt(L.sets[idxWork[j]],e.n):"";
+        h+=`<tr class="${s.done?"ok":""} ${s.k===1?"warm":s.k===2?"drop":""} ${s.fb?"fb-"+s.fb:""}"><td><button class="lblbtn" data-kind="${i}.${j}" aria-label="Tipo de serie"><span class="lbl">${lbl}</span>${s.fb==="pr"?`<span class="prtag">PR</span>`:""}</button></td>
+        <td class="prev">${esc(pv)}</td>
+        <td><input class="${s.sug&&!s.done?"sug":""}" inputmode="decimal" data-w="${i}.${j}" value="${s.w==null?"":fmt1(s.w)}" placeholder="${m.type==="bw"?"0":"kg"}" aria-label="Kilos"></td>
+        <td><input class="${s.sug&&!s.done?"sug":""}" inputmode="numeric" data-r="${i}.${j}" value="${s.r||""}" placeholder="reps" aria-label="Reps"></td>
+        <td><button class="rir ${s.rir==null?"empty":""}" data-rir="${i}.${j}" aria-label="Reps en reserva">${s.rir==null?"–":s.rir===4?"4+":s.rir}</button></td>
+        <td><button class="check" data-ok="${i}.${j}" aria-label="Serie hecha">✓</button></td></tr>`;});
+    }
+    h+=`</tbody></table><div class="setbtns"><button class="link" data-addset="${i}">+ Serie</button>${m.type==="time"?"":`<button class="link" data-addwarm="${i}">+ Calentamiento</button>`}<button class="link" data-rmset="${i}" style="color:var(--muted)">− Última</button></div></div>`;
+  });
+  h+=`<button class="btn ghost full" id="addEx">+ Agregar ejercicio</button>
+  <div class="field" style="margin-top:14px"><label for="snote">Notas de la sesión</label><textarea id="snote" rows="2">${esc(A.notes||"")}</textarea></div>
+  <button class="btn danger full" id="cancel" style="margin-top:6px">${A.editing?"Descartar cambios":"Cancelar entrenamiento"}</button>`;
+  $("#view").innerHTML=h;bindActive();
+}
+
+function bindActive(){
+  const A=S.active;
+  const get=k=>{const[i,j]=k.split(".").map(Number);return{e:A.ex[i],s:A.ex[i].sets[j],i,j};};
+  $$("[data-w]").forEach(inp=>inp.onchange=()=>{const{s}=get(inp.dataset.w);s.w=num(inp.value);s.sug=0;save();});
+  $$("[data-r]").forEach(inp=>inp.onchange=()=>{const{s}=get(inp.dataset.r);s.r=parseInt(inp.value)||0;s.sug=0;save();});
+  $$("[data-sec]").forEach(inp=>inp.onchange=()=>{const{s}=get(inp.dataset.sec);s.sec=parseInt(inp.value)||0;s.sug=0;save();});
+  $$("#view input").forEach(inp=>inp.onfocus=()=>inp.select());
+  $$("[data-rir]").forEach(b=>b.onclick=()=>{const{s}=get(b.dataset.rir);s.rir=s.rir==null?0:(s.rir>=4?null:s.rir+1);save();b.textContent=s.rir==null?"–":s.rir===4?"4+":s.rir;b.classList.toggle("empty",s.rir==null);});
+  $$("[data-ok]").forEach(b=>b.onclick=()=>{
+    const{e,s}=get(b.dataset.ok);const m=meta(e.n);const row=b.closest("tr");
+    if(m.type==="time"){s.sec=parseInt(row.querySelector("[data-sec]").value)||0;if(!s.done&&!s.sec){toast("Anota los segundos o usa ▶");return;}}
+    else{s.w=num(row.querySelector("[data-w]").value);s.r=parseInt(row.querySelector("[data-r]").value)||0;if(!s.done&&!s.r){toast("Anota las reps primero");row.querySelector("[data-r]").focus();return;}}
+    s.done=!s.done;s.sug=0;
+    if(s.done&&s.k!==1)s.fb=feedback(e,s,A);else delete s.fb;
+    save();
+    if(s.done&&!A.editing){if(s.fb==="pr")toast("Récord personal en "+e.n);startRest(s.k===1?45:(e.it?parseRest(e.it.rest||S.settings.defaultRest):S.settings.defaultRest));}
+    renderActive();});
+  $$("[data-watch]").forEach(b=>b.onclick=()=>{const{e,s,i,j}=get(b.dataset.watch);stopwatchSheet(e,s,()=>{s.done=true;s.sug=0;s.fb=feedback(e,s,A);save();renderActive();if(!A.editing)startRest(e.it?parseRest(e.it.rest||60):60);});});
+  $$("[data-kind]").forEach(b=>b.onclick=()=>{const{s}=get(b.dataset.kind);s.k=s.k===0?1:(s.k===1?2:0);delete s.fb;save();renderActive();toast(s.k===1?"Serie de calentamiento":(s.k===2?"Drop set":"Serie efectiva"),1400);});
+  $$("[data-addset]").forEach(b=>b.onclick=()=>{const e=A.ex[+b.dataset.addset];const l=e.sets[e.sets.length-1];e.sets.push(l?{w:l.w,r:l.r,sec:l.sec,k:0,sug:1}:{k:0,sug:1});save();renderActive();});
+  $$("[data-addwarm]").forEach(b=>b.onclick=()=>{const e=A.ex[+b.dataset.addwarm];const f=e.sets.find(x=>x.k!==1);const w=f&&f.w?roundTo(f.w*.5,stepFor(e.n,f.w)):null;e.sets.unshift({w,r:8,k:1,sug:1});save();renderActive();});
+  $$("[data-rmset]").forEach(b=>b.onclick=()=>{const e=A.ex[+b.dataset.rmset];e.sets.pop();save();renderActive();});
+  $$("[data-rmex]").forEach(b=>b.onclick=()=>{if(!confirm("¿Quitar este ejercicio de la sesión?"))return;A.ex.splice(+b.dataset.rmex,1);save();renderActive();});
+  $$("[data-plates]").forEach(b=>b.onclick=()=>{const e=A.ex[+b.dataset.plates];const s=e.sets.find(x=>!x.done&&x.k!==1)||e.sets[0];plateSheet(s&&s.w?s.w:60);});
+  $$("[data-var]").forEach(sel=>sel.onchange=()=>{const e=A.ex[+sel.dataset.var];const i=+sel.dataset.var;
+    if(e.it&&!e.sets.some(s=>s.done)){A.ex[i]=buildEx({...e.it,n:e.slot,c:e.c},sel.value,A.id);}else e.n=sel.value;save();renderActive();});
+  $("#snote").onchange=ev=>{A.notes=ev.target.value;save();};
+  $("#addEx").onclick=addExerciseSheet;
+  $("#cancel").onclick=()=>{if(!confirm(A.editing?"¿Descartar los cambios?":"¿Cancelar y borrar este entrenamiento?"))return;S.active=null;save();stopRest();wake(false);render();};
+}
+/* verde = mejor que la vez pasada (o récord), amarillo = igual, rojo = peor */
+function feedback(e,s,A){
+  const m=meta(e.n);const L=lastOf(e.n,A.id);const idx=e.sets.filter(x=>x.k!==1).indexOf(s);
+  if(m.type==="time"){const prev=L&&L.sets[idx]?(L.sets[idx].sec||L.sets[idx].r):null;const best=Math.max(0,...historyOf(e.n,A.id).flatMap(h=>h.sets.map(x=>x.sec||x.r||0)));
+    if(best&&s.sec>best)return"pr";if(prev==null)return null;return s.sec>prev?"up":s.sec===prev?"eq":"down";}
+  const cur=setE(e.n,s,Date.now()).v;if(!cur)return null;
+  const best=bestE(e.n,A.id);if(best&&cur>best*1.001)return"pr";
+  const px=L&&L.sets[idx];if(!px)return null;const pv=setE(e.n,px,L.t).v;if(!pv)return null;
+  const d=cur/pv-1;return d>0.005?"up":d>-0.005?"eq":"down";}
+function allExerciseNames(){const m=new Map();live().forEach(s=>s.ex.forEach(e=>{if(!e.fixed)m.set(e.n,(m.get(e.n)||0)+1);}));return[...m.entries()].sort((a,b)=>b[1]-a[1]).map(x=>x[0]);}
+function addExerciseSheet(){
+  const names=allExerciseNames();const d=$("#dlg");
+  d.innerHTML=`<h3>Agregar ejercicio</h3><div class="field" style="margin-top:10px"><label for="exq">Busca o escribe uno nuevo</label><input id="exq" list="exl" autocomplete="off"><datalist id="exl">${names.map(n=>`<option value="${esc(n)}">`).join("")}</datalist></div>
+  <div class="grid3"><div class="field"><label>Series</label><input id="exs" inputmode="numeric" value="3"></div><div class="field"><label>Reps mín.</label><input id="exlo" inputmode="numeric" value="8"></div><div class="field"><label>Reps máx.</label><input id="exhi" inputmode="numeric" value="12"></div></div>
+  <div class="row"><button class="btn ghost grow" id="exc">Cancelar</button><button class="btn grow" id="exa">Agregar</button></div>`;
+  d.showModal();$("#exc").onclick=()=>d.close();
+  $("#exa").onclick=()=>{const n=$("#exq").value.trim();if(!n){toast("Escribe un nombre");return;}
+    const it={s:parseInt($("#exs").value)||3,lo:parseInt($("#exlo").value)||8,hi:parseInt($("#exhi").value)||12,rir:2,rest:S.settings.defaultRest,c:[n]};
+    const e=buildEx(it,n,S.active.id);e.slot=null;S.active.ex.push(e);save();d.close();renderActive();window.scrollTo(0,document.body.scrollHeight);};
+}
+function finishSession(){
+  const A=S.active;
+  const ex=A.ex.filter(e=>!e.fixed).map(e=>({n:e.n,sets:e.sets.filter(s=>s.done&&(s.r>0||s.w||s.sec)).map(s=>{const o={k:s.k};if(s.w!=null)o.w=s.w;if(s.r)o.r=s.r;if(s.sec)o.sec=s.sec;if(s.rir!=null)o.rir=s.rir;if(s.a)o.a=1;return o;})})).filter(e=>e.sets.length);
+  const pending=A.ex.reduce((a,e)=>a+e.sets.filter(s=>!s.done).length,0);
+  if(!ex.length){if(!confirm("No marcaste ninguna serie. ¿Salir sin guardar?"))return;S.active=null;save();stopRest();wake(false);render();return;}
+  if(pending&&!A.editing&&!confirm(`Quedan ${pending} series sin marcar; no se guardarán. ¿Terminar igual?`))return;
+  const prs=A.ex.reduce((a,e)=>a+e.sets.filter(s=>s.done&&s.fb==="pr").length,0);
+  const sess={id:A.id,t:A.t,end:A.editing?A.end:Date.now(),name:A.name,notes:A.notes||"",u:Date.now(),ex};
+  const i=S.sessions.findIndex(s=>s.id===A.id);if(i>=0)S.sessions[i]=sess;else S.sessions.push(sess);
+  S.sessions.sort((a,b)=>a.t-b.t);S.active=null;save();stopRest();wake(false);
+  const n=ex.reduce((a,e)=>a+e.sets.filter(s=>s.k!==1).length,0);
+  toast(A.editing?"Sesión actualizada":`Guardado: ${n} series efectivas${prs?` y ${prs} récord${prs>1?"s":""}`:""}`,3500);
+  autoSync();go(A.editing?"history":"train");
+}
+
+/* ================= dock: descanso / terminar ================= */
+let rEnd=0,rDur=0,rInt=null,alarmInt=null,elInt=null,audio=null;
+function ac(){try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();if(audio.state==="suspended")audio.resume();}catch(e){}return audio;}
+function beep(){if(!S.settings.sound)return;const a=ac();if(!a)return;[0,.22,.44].forEach(d=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=880;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.3,a.currentTime+d);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+d+.18);o.start(a.currentTime+d);o.stop(a.currentTime+d+.2);});}
+function buzz(){try{navigator.vibrate&&navigator.vibrate([300,120,300]);}catch(e){}}
+function startRest(sec){rDur=sec;rEnd=Date.now()+sec*1000;clearInterval(alarmInt);alarmInt=null;ac();clearInterval(rInt);rInt=setInterval(restTick,250);renderDock();}
+function restTick(){if(!rEnd)return;const left=(rEnd-Date.now())/1000;
+  if(left<=0&&!alarmInt){clearInterval(rInt);rInt=null;beep();buzz();
+    if(S.settings.loop){let n=0;alarmInt=setInterval(()=>{if(++n>40){stopRest();return;}beep();buzz();},1500);}else setTimeout(stopRest,5000);
+    renderDock();return;}
+  const el=$("#rNum");if(el)el.textContent=mmss(left);const bar=$("#rBar");if(bar)bar.style.width=Math.max(0,Math.min(100,100*(1-left/rDur)))+"%";}
+function stopRest(){clearInterval(rInt);clearInterval(alarmInt);rInt=null;alarmInt=null;rEnd=0;try{navigator.vibrate&&navigator.vibrate(0);}catch(e){}renderDock();}
+function renderDock(){
+  const dock=$("#dock"),inn=$("#dockIn");clearInterval(elInt);
+  const A=S.active;
+  if(!A&&!rEnd){
+    if(view==="train"){dock.style.display="block";dock.classList.remove("alarm");
+      inn.innerHTML=`<button class="btn full" id="dStart">Empezar ${esc(pickDay||"")}</button><button class="btn ghost small" id="dFree" style="min-height:48px">Libre</button>`;
+      $("#dStart").onclick=()=>startSession(pickDay);$("#dFree").onclick=()=>startSession(null);}
+    else dock.style.display="none";return;}
+  dock.style.display="block";
+  if(rEnd&&alarmInt){dock.classList.add("alarm");inn.innerHTML=`<span class="num grow">¡Dale!</span><button class="db" id="dOk" style="min-width:120px">Listo</button>`;$("#dOk").onclick=stopRest;return;}
+  dock.classList.remove("alarm");
+  if(rEnd){inn.innerHTML=`<span class="num" id="rNum">${mmss((rEnd-Date.now())/1000)}</span><span class="prog"><i id="rBar"></i></span><button class="db" id="dM" aria-label="Restar 15 s">−15</button><button class="db" id="dP" aria-label="Sumar 15 s">+15</button><button class="db" id="dS">Listo</button>`;
+    $("#dM").onclick=()=>{rEnd-=15000;restTick();};$("#dP").onclick=()=>{rEnd+=15000;rDur+=15;restTick();};$("#dS").onclick=stopRest;restTick();return;}
+  if(A){inn.innerHTML=`<span class="num grow" id="elap">${A.editing?"Edición":mmss((Date.now()-A.t)/1000)}</span>${view!=="train"?`<button class="db" id="dBack">Volver</button>`:""}<button class="btn go" id="dFin">${A.editing?"Guardar":"Terminar"}</button>`;
+    $("#dFin").onclick=()=>{if(view!=="train"){go("train");}finishSession();};const bb=$("#dBack");if(bb)bb.onclick=()=>go("train");
+    if(!A.editing)elInt=setInterval(()=>{const el=$("#elap");if(el&&S.active)el.textContent=mmss((Date.now()-S.active.t)/1000);},1000);}
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){if(rEnd)restTick();if(S.active&&!S.active.editing)wake(true);}});
+
+/* ---------- cronómetro isométrico ---------- */
+function stopwatchSheet(e,s,done){
+  const d=$("#dlg");let t0=0,int=null,val=0;const goal=e.it&&e.it.time;
+  d.innerHTML=`<h3>${esc(e.slot||e.n)}</h3><p class="muted small" style="margin:2px 0 0">${goal?`Meta: ${goal} s`:"Cronómetro"}</p><div class="bignum" id="swN">0</div>
+  <div class="row"><button class="btn ghost grow" id="swC">Cancelar</button><button class="btn go grow" id="swB">Empezar</button></div>`;
+  d.showModal();ac();
+  const tick=()=>{val=Math.floor((Date.now()-t0)/1000);$("#swN").textContent=val;if(goal&&val===goal){beep();buzz();}};
+  $("#swB").onclick=()=>{if(!int){t0=Date.now();int=setInterval(tick,200);$("#swB").textContent="Parar y guardar";$("#swB").classList.remove("go");}
+    else{clearInterval(int);tick();s.sec=val;d.close();done();}};
+  $("#swC").onclick=()=>{clearInterval(int);d.close();};
+  d.onclose=()=>clearInterval(int);
+}
+/* ---------- calculadora de discos ---------- */
+const PCOL={25:"var(--red)",20:"var(--blue)",15:"var(--yellow)",10:"var(--green)",5:"#E8ECEF",2.5:"#8E9BA5",1.25:"#C7CED4"};
+function platesFor(total,bar,avail){let side=(total-bar)/2;const out=[];if(side<0)return{out,rest:side};
+  [...avail].sort((a,b)=>b-a).forEach(p=>{while(side>=p-1e-9){out.push(p);side-=p;}});return{out,rest:Math.round(side*100)/100};}
+function plateSheet(total){
+  const d=$("#dlg");const st=S.settings;
+  const draw=()=>{const T=num($("#plT").value)||0;const B=num($("#plB").value)||20;const r=platesFor(T,B,st.plates);
+    const sp=r.out.map(p=>`<span class="p" style="height:${40+p*3.2}px;background:${PCOL[p]||"var(--slate)"}">${fmt1(p)}</span>`);
+    $("#plV").innerHTML=T<B?`<p class="muted">El total es menor que la barra.</p>`:`<div class="platebar">${[...sp].reverse().join("")}<span class="bar"></span>${sp.join("")}</div>
+      <p style="text-align:center;margin:0"><b>Por lado:</b> ${r.out.length?r.out.map(fmt1).join(" + ")+" kg":"solo la barra"}</p>${r.rest>0?`<p class="small muted" style="text-align:center">Faltan ${fmt1(r.rest*2)} kg que no se pueden armar con tus discos.</p>`:""}`;};
+  d.innerHTML=`<h3>Calculadora de discos</h3><div class="grid3" style="grid-template-columns:2fr 1fr;margin-top:10px"><div class="field"><label for="plT">Peso total (kg)</label><input id="plT" inputmode="decimal" value="${fmt1(total)}"></div><div class="field"><label for="plB">Barra</label><input id="plB" inputmode="decimal" value="${fmt1(st.bar)}"></div></div><div id="plV"></div><button class="btn ghost full" id="plC" style="margin-top:10px">Cerrar</button>`;
+  d.showModal();draw();$("#plT").oninput=draw;$("#plB").oninput=draw;$("#plC").onclick=()=>d.close();
+}
+/* ---------- pantalla encendida ---------- */
+let wl=null;
+async function wake(on){try{if(on&&S.settings.wake&&"wakeLock" in navigator){if(!wl){wl=await navigator.wakeLock.request("screen");wl.addEventListener("release",()=>wl=null);}}else if(!on&&wl){await wl.release();wl=null;}}catch(e){}}
+
+/* ================= HISTORIAL ================= */
+let histLimit=40;
+function renderHistory(){
+  const L=live().slice().reverse();
+  let h=`<p class="muted" style="margin-top:0">${L.length} sesiones</p><ul class="list panel" style="padding:0 12px">`;let lastM="";
+  L.slice(0,histLimit).forEach(s=>{const m=new Date(s.t).toLocaleDateString("es-CL",{month:"long",year:"numeric"});
+    if(m!==lastM){h+=`<li style="padding:14px 0 4px;border-bottom:0"><span class="cond" style="font-size:18px;font-weight:600;text-transform:capitalize">${m}</span></li>`;lastM=m;}
+    const n=s.ex.reduce((a,e)=>a+e.sets.filter(x=>x.k!==1).length,0);const dur=s.end&&s.end>s.t?Math.round((s.end-s.t)/60000):0;
+    h+=`<li><button class="hitem" data-sess="${s.id}"><span><b>${esc(s.name||"Entrenamiento")}</b><br><span class="small muted">${fmtDs(s.t)}${dur?` · ${dur} min`:""} · ${s.ex.length} ejercicios · ${n} series</span></span><span class="muted">›</span></button></li>`;});
+  h+=`</ul>`;if(L.length>histLimit)h+=`<button class="btn ghost full" id="more" style="margin-top:10px">Ver más</button>`;
+  $("#view").innerHTML=h;
+  $$("[data-sess]").forEach(b=>b.onclick=()=>sessionSheet(b.dataset.sess));
+  const m=$("#more");if(m)m.onclick=()=>{histLimit+=40;renderHistory();};
+}
+function sessionSheet(id){
+  const s=S.sessions.find(x=>x.id===id);const d=$("#dlg");
+  let h=`<h3>${esc(s.name||"Entrenamiento")}</h3><p class="muted small" style="margin:2px 0 10px">${new Date(s.t).toLocaleString("es-CL",{weekday:"long",day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})}</p>`;
+  s.ex.forEach(e=>{h+=`<p style="margin:8px 0 2px"><b>${esc(e.n)}</b></p><p class="small" style="margin:0;font-variant-numeric:tabular-nums">${e.sets.map(x=>(x.k===1?"W ":x.k===2?"D ":"")+setTxt(x,e.n)+(x.a?"*":"")).join(" · ")}</p>`;});
+  if(s.notes)h+=`<p class="small muted">${esc(s.notes)}</p>`;
+  h+=`<div class="row" style="margin-top:16px"><button class="btn danger small" id="sdel">Borrar</button><span class="grow"></span><button class="btn ghost small" id="sclose">Cerrar</button><button class="btn small" id="sedit">Editar</button></div>`;
+  d.innerHTML=h;d.showModal();
+  $("#sclose").onclick=()=>d.close();
+  $("#sdel").onclick=()=>{if(!confirm("¿Borrar esta sesión?"))return;s.del=1;s.u=Date.now();s.ex=[];save();d.close();autoSync();renderHistory();};
+  $("#sedit").onclick=()=>{if(S.active&&!confirm("Tienes un entrenamiento en curso. ¿Reemplazarlo por esta edición?"))return;d.close();startSession(null,id);};
+}
+
+/* ================= PROGRESO ================= */
+let progEx=null,progMetric="e1rm",volRange=0;
+function weeklyVolume(startW,weeks){
+  const dir={},ind={};MUSCLES.forEach(m=>{dir[m]=0;ind[m]=0;});
+  live().filter(s=>s.t>=startW&&s.t<startW+weeks*7*DAY).forEach(s=>s.ex.forEach(e=>{const m=meta(e.n);if(!m.p)return;const n=e.sets.filter(x=>x.k!==1).length;dir[m.p]+=n;(m.s||[]).forEach(q=>{if(ind[q]!=null)ind[q]+=n*.5;});}));
+  MUSCLES.forEach(m=>{dir[m]/=weeks;ind[m]/=weeks;});return{dir,ind};}
+function renderProgress(){
+  const L=live();const now=Date.now();
+  const wk=new Set(L.map(s=>weekStart(s.t)));const ws=[...wk].sort((a,b)=>a-b);
+  let best=0,cur=0;for(let i=0;i<ws.length;i++){cur=(i&&Math.round((ws[i]-ws[i-1])/(7*DAY))===1)?cur+1:1;best=Math.max(best,cur);}
+  let streak=0;{let w=weekStart(now);if(!wk.has(w))w-=7*DAY;while(wk.has(w)){streak++;w-=7*DAY;}}
+  const last8=L.filter(s=>s.t>=weekStart(now)-7*7*DAY).length;
+  const tw=L.filter(s=>s.t>=weekStart(now)).reduce((a,s)=>a+s.ex.reduce((b,e)=>b+e.sets.filter(x=>x.k!==1).length,0),0);
+  const names=allExerciseNames();if(!progEx||!names.includes(progEx))progEx=names.includes("Bench Press (Dumbbell)")?"Bench Press (Dumbbell)":names[0];
+  let h=`<div class="stats"><div class="stat"><div class="num">${tw}</div><div class="lbl">series efectivas esta semana</div></div><div class="stat"><div class="num">${(last8/8).toFixed(1).replace(".",",")}</div><div class="lbl">sesiones por semana, últimas 8</div></div><div class="stat"><div class="num">${streak} sem</div><div class="lbl">racha actual (récord ${best})</div></div><div class="stat"><div class="num">${L.length}</div><div class="lbl">sesiones en total</div></div></div>`;
+  h+=`<h2>Volumen por músculo</h2><div class="panel"><div class="chips" id="vr">${[[0,"Esta semana"],[4,"Prom. 4 sem"],[12,"Prom. 12 sem"]].map(([v,l])=>`<button class="chip" data-r="${v}" aria-pressed="${volRange===v}">${l}</button>`).join("")}</div><div id="vchart" style="margin-top:10px"></div>
+  <p class="small muted" style="margin:6px 0 0">Series efectivas por semana. Barra llena = series directas; clara = indirectas (un compuesto suma ½ serie a los músculos secundarios, por ejemplo el press a hombro y tríceps). La franja marca 10–20: bajo 10 queda estímulo en la mesa y sobre 20 hay rendimientos decrecientes.</p></div>`;
+  h+=`<h2>Por ejercicio</h2><div class="panel"><div class="field"><select id="pex" aria-label="Ejercicio">${names.map(n=>`<option ${n===progEx?"selected":""}>${esc(n)}</option>`).join("")}</select></div>
+  <div class="chips" id="pm">${[["e1rm","1RM estimado"],["max","Carga máx."],["reps","Reps máx."],["ton","Tonelaje"]].map(([v,l])=>`<button class="chip" data-m="${v}" aria-pressed="${progMetric===v}">${l}</button>`).join("")}</div>
+  <div id="pchart" style="margin-top:8px"></div><p class="small muted" id="pnote" style="margin:4px 0 0"></p><div class="prs" id="pprs"></div>
+  <div class="row" style="margin-top:12px"><span class="small muted grow" id="pmeta"></span><button class="tool" id="pedit">Editar tipo</button></div></div>`;
+  h+=`<h2>Sesiones por semana</h2><div class="panel"><div id="wchart"></div></div>`;
+  const bws=(S.bw||[]).filter(x=>!x.del);if(bws.length>1)h+=`<h2>Peso corporal</h2><div class="panel"><div id="bwchart"></div></div>`;
+  $("#view").innerHTML=h;
+  $("#pex").onchange=e=>{progEx=e.target.value;drawEx();};
+  $$("#pm .chip").forEach(b=>b.onclick=()=>{progMetric=b.dataset.m;$$("#pm .chip").forEach(x=>x.setAttribute("aria-pressed",x===b));drawEx();});
+  $$("#vr .chip").forEach(b=>b.onclick=()=>{volRange=+b.dataset.r;$$("#vr .chip").forEach(x=>x.setAttribute("aria-pressed",x===b));drawVol();});
+  $("#pedit").onclick=()=>exMetaSheet(progEx,()=>renderProgress());
+  drawVol();drawEx();drawWeeks();
+  if(bws.length>1)$("#bwchart").innerHTML=lineChart(bws.sort((a,b)=>a.t-b.t).map(x=>({x:x.t,y:x.kg})),"kg");
+}
+function lineChart(pts,unit){
+  if(!pts.length)return`<p class="muted">Sin datos.</p>`;
+  const W=640,H=300,pl=56,pr=14,pt=14,pb=36;const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);let x0=Math.min(...xs),x1=Math.max(...xs);if(x0===x1){x0-=DAY*15;x1+=DAY*15;}
+  let y0=Math.min(...ys),y1=Math.max(...ys);const pad=Math.max(1,(y1-y0)*.12);y0=Math.max(0,y0-pad);y1+=pad;
+  const X=x=>pl+(x-x0)/(x1-x0)*(W-pl-pr),Y=y=>H-pb-(y-y0)/(y1-y0)*(H-pt-pb);
+  let g="";for(let i=0;i<=4;i++){const v=y0+(y1-y0)*i/4;g+=`<line class="grid" x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${pl-8}" y="${Y(v)+7}" text-anchor="end">${Math.round(v)}</text>`;}
+  for(let i=0;i<=4;i++){const v=x0+(x1-x0)*i/4;g+=`<text x="${X(v)}" y="${H-8}" text-anchor="${i===0?"start":i===4?"end":"middle"}">${fmtM(v)}</text>`;}
+  const d=pts.map((p,i)=>(i?"L":"M")+X(p.x).toFixed(1)+" "+Y(p.y).toFixed(1)).join(" ");
+  const dots=pts.map(p=>`<circle cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="${p.low?3:3.5}" fill="${p.low?"var(--surface)":"var(--red)"}" stroke="var(--red)" stroke-width="${p.low?1.5:0}"><title>${fmtD(p.x)}: ${fmt1(p.y)} ${unit}${p.low?" (poco fiable)":""}</title></circle>`).join("");
+  return`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico">${g}<path d="${d}" fill="none" stroke="var(--red)" stroke-width="2.2" stroke-linejoin="round"/>${dots}</svg>`;}
+function drawEx(){
+  const ex=progEx;const m=meta(ex);const hist=historyOf(ex);
+  let metric=progMetric;if(m.type==="time"&&metric!=="reps")metric="reps";
+  const pts=hist.map(h=>{let v=0,low=false;
+    if(m.type==="time"){v=Math.max(0,...h.sets.map(x=>x.sec||x.r||0));}
+    else if(metric==="e1rm"){h.sets.forEach(x=>{const r=setE(ex,x,h.t);if(r.v>v){v=r.v;low=r.low;}});}
+    else if(metric==="max")v=Math.max(0,...h.sets.map(x=>loadOf(ex,x.w,h.t)||0));
+    else if(metric==="reps")v=Math.max(0,...h.sets.map(x=>x.r||0));
+    else v=h.sets.reduce((a,x)=>a+(loadOf(ex,x.w,h.t)||0)*(x.r||0),0);
+    return{x:h.t,y:Math.round(v*10)/10,low};}).filter(p=>p.y>0);
+  const unit=m.type==="time"?"s":metric==="reps"?"reps":"kg";
+  $("#pchart").innerHTML=lineChart(pts,unit);
+  const noBw=(m.type==="bw"||m.type==="assist")&&bwAt(Date.now())==null;
+  $("#pnote").textContent=m.type==="time"?"Segundos máximos por sesión.":metric==="e1rm"?"Brzycki hasta 5 reps, Epley de 6 a 10; sobre 10 el punto sale hueco porque la estimación es poco fiable. El RIR anotado se suma a las reps."+(noBw?" Falta tu peso corporal: la carga real no incluye el cuerpo.":""):metric==="ton"?"Carga real × reps de las series efectivas.":(m.type==="bw"?"Carga real = peso corporal + lastre.":"");
+  const pr=[];
+  if(m.type!=="time"){let b=null;hist.forEach(h=>h.sets.forEach(x=>{const r=setE(ex,x,h.t);if(r.v&&(!b||r.v>b.v))b={...r,x,t:h.t};}));
+    if(b)pr.push([fmt1(Math.round(b.v*10)/10)+" kg","mejor 1RM estimado"+(b.low?" (poco fiable)":""),`${setTxt(b.x,ex)} · ${fmtD(b.t)}`]);
+    let hw=null;hist.forEach(h=>h.sets.forEach(x=>{const l=loadOf(ex,x.w,h.t)||0;if(!hw||l>hw.l||(l===hw.l&&x.r>hw.x.r))hw={l,x,t:h.t};}));
+    if(hw&&hw.l)pr.push([fmt1(Math.round(hw.l*10)/10)+" kg","carga más alta",`${setTxt(hw.x,ex)} · ${fmtD(hw.t)}`]);
+    let r=null;hist.forEach(h=>h.sets.forEach(x=>{if(!r||x.r>r.x.r)r={x,t:h.t};}));if(r)pr.push([r.x.r+" reps","más reps",`${setTxt(r.x,ex)} · ${fmtD(r.t)}`]);}
+  else{let b=0,bt=0;hist.forEach(h=>h.sets.forEach(x=>{const v=x.sec||x.r||0;if(v>b){b=v;bt=h.t;}}));if(b)pr.push([b+" s","mejor tiempo",fmtD(bt)]);}
+  pr.push([hist.length,"sesiones",hist.length?`desde ${fmtD(hist[0].t)}`:""]);
+  $("#pprs").innerHTML=pr.map(([n,l,d])=>`<div class="pr"><div class="num">${n}</div><div class="lbl">${l}</div><div class="lbl">${d}</div></div>`).join("");
+  $("#pmeta").textContent=`${TYPES[m.type]}${m.type==="bw"&&m.f!==1?` (${Math.round(m.f*100)}% del peso)`:""} · ${m.p?m.p+(m.s&&m.s.length?" + "+m.s.join(", "):""):"sin músculo asignado"}`;
+}
+function drawVol(){
+  const now=Date.now();const W=volRange||1;const start=volRange?weekStart(now)-(volRange-1)*7*DAY:weekStart(now);
+  const{dir,ind}=weeklyVolume(start,W);
+  const Wd=640,rowH=42,pl=150,pr=64,H=MUSCLES.length*rowH+30;const max=Math.max(24,...MUSCLES.map(m=>dir[m]+ind[m]));const X=v=>pl+v/max*(Wd-pl-pr);
+  let s=`<svg class="chart" viewBox="0 0 ${Wd} ${H}" role="img" aria-label="Volumen por músculo"><rect x="${X(10)}" y="0" width="${X(20)-X(10)}" height="${H-20}" fill="var(--green)" opacity=".12"/>`;
+  MUSCLES.forEach((m,i)=>{const y=i*rowH+4;const d=dir[m],t=d+ind[m];const col=t>20?"var(--orange)":t>=10?"var(--green)":"var(--muted)";
+    s+=`<text x="${pl-10}" y="${y+25}" text-anchor="end" style="fill:var(--ink)">${m}</text><rect x="${pl}" y="${y+6}" width="${Math.max(0,X(t)-pl)}" height="26" rx="4" fill="var(${MCOL[m]})" opacity=".35"/><rect x="${pl}" y="${y+6}" width="${Math.max(0,X(d)-pl)}" height="26" rx="4" fill="var(${MCOL[m]})"/><text x="${X(t)+8}" y="${y+26}" style="fill:${col};font-weight:600">${t.toFixed(1).replace(".",",").replace(",0","")}</text>`;});
+  [0,10,20].forEach(v=>s+=`<text x="${X(v)}" y="${H-6}" text-anchor="middle">${v}</text>`);
+  $("#vchart").innerHTML=s+"</svg>";}
+function drawWeeks(){
+  const L=live();const endW=weekStart(Date.now());const n=16;const cnt=Array(n).fill(0);
+  L.forEach(s=>{const i=n-1-Math.round((endW-weekStart(s.t))/(7*DAY));if(i>=0&&i<n)cnt[i]++;});
+  const W=640,H=190,pb=30,bw=(W-20)/n;const max=Math.max(4,...cnt);
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sesiones por semana">`;
+  cnt.forEach((c,i)=>{const h=(H-pb-10)*c/max;const x=10+i*bw;s+=`<rect x="${x+3}" y="${H-pb-h}" width="${bw-6}" height="${h}" rx="3" fill="var(--blue)"/>`;if(c)s+=`<text x="${x+bw/2}" y="${H-pb-h-6}" text-anchor="middle">${c}</text>`;
+    if(i%4===0)s+=`<text x="${x+bw/2}" y="${H-6}" text-anchor="middle">${new Date(endW-(n-1-i)*7*DAY).toLocaleDateString("es-CL",{day:"numeric",month:"short"})}</text>`;});
+  $("#wchart").innerHTML=s+"</svg>";}
+function exMetaSheet(name,done){
+  const m=meta(name);const d=$("#dlg");
+  d.innerHTML=`<h3>${esc(name)}</h3>
+  <div class="field" style="margin-top:10px"><label for="mt">Tipo</label><select id="mt">${Object.entries(TYPES).map(([k,v])=>`<option value="${k}" ${m.type===k?"selected":""}>${v}</option>`).join("")}</select></div>
+  <div class="field" id="mfw"><label for="mf">Fracción del peso corporal que mueves (1 = dominadas o fondos; 0,64 = flexiones)</label><input id="mf" inputmode="decimal" value="${fmt1(m.f)}"></div>
+  <div class="field"><label for="mp">Músculo principal (cuenta 1 serie)</label><select id="mp"><option value="">Ninguno (no suma volumen)</option>${MUSCLES.map(x=>`<option ${m.p===x?"selected":""}>${x}</option>`).join("")}</select></div>
+  <div class="field"><label>Secundarios (cuentan ½ serie)</label><div class="chips" id="ms">${MUSCLES.map(x=>`<button class="chip" data-m="${x}" aria-pressed="${(m.s||[]).includes(x)}">${x}</button>`).join("")}</div></div>
+  <div class="row"><button class="btn ghost small" id="mr">Automático</button><span class="grow"></span><button class="btn ghost small" id="mc">Cancelar</button><button class="btn small" id="mok">Guardar</button></div>`;
+  d.showModal();
+  const tog=()=>$("#mfw").classList.toggle("hidden",!["bw","assist"].includes($("#mt").value));tog();$("#mt").onchange=tog;
+  $$("#ms .chip").forEach(b=>b.onclick=()=>b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true"));
+  $("#mc").onclick=()=>d.close();
+  $("#mr").onclick=()=>{delete S.exMeta[name];S.mu=Date.now();save();d.close();done();};
+  $("#mok").onclick=()=>{S.exMeta[name]={type:$("#mt").value,f:num($("#mf").value)||1,p:$("#mp").value||null,s:[...$$("#ms .chip")].filter(b=>b.getAttribute("aria-pressed")==="true").map(b=>b.dataset.m)};S.mu=Date.now();save();autoSync();d.close();done();};
+}
+
+/* ================= RUTINA ================= */
+const DN=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+function renderRoutine(){
+  let h=`<p class="muted" style="margin-top:0">Edita días, ejercicios, series y rangos. Las recomendaciones salen de aquí.</p>`;
+  S.routine.forEach((d,di)=>{
+    h+=`<h2 class="row"><span class="grow">${esc(d.k)}</span><span class="small muted" style="font:400 14px Barlow,'Segoe UI',Roboto,Arial,sans-serif">${d.dow!=null?DN[d.dow]:"sin día"}</span><button class="icon" data-editday="${di}" aria-label="Editar día">✎</button></h2><div class="panel" style="padding:4px 12px">`;
+    d.items.forEach((it,ii)=>{const desc=it.fixed?esc(it.fixed):it.time?`${it.s}×${it.time} s · ${esc((it.c||[]).join(" / "))}`:`${it.s}×${it.lo}–${it.hi} · RIR ${it.rir} · ${mmss(parseRest(it.rest))} · ${esc((it.c||[]).join(" / "))}`;
+      h+=`<div class="ritem"><div class="grow"><div class="t">${esc(it.n)}</div><div class="d">${desc}</div></div><button class="icon" data-up="${di}.${ii}" aria-label="Subir">↑</button><button class="icon" data-edit="${di}.${ii}" aria-label="Editar">✎</button></div>`;});
+    h+=`<button class="link" data-additem="${di}">+ Agregar ejercicio</button></div>`;});
+  h+=`<div class="row" style="margin-top:16px"><button class="btn ghost small grow" id="addDay">+ Nuevo día</button><button class="btn ghost small grow" id="resetR">Restaurar original</button></div>`;
+  $("#view").innerHTML=h;
+  const touch=()=>{S.ru=Date.now();save();autoSync();renderRoutine();};
+  $$("[data-up]").forEach(b=>b.onclick=()=>{const[d,i]=b.dataset.up.split(".").map(Number);if(!i)return;const a=S.routine[d].items;[a[i-1],a[i]]=[a[i],a[i-1]];touch();});
+  $$("[data-edit]").forEach(b=>b.onclick=()=>{const[d,i]=b.dataset.edit.split(".").map(Number);itemSheet(d,i,touch);});
+  $$("[data-additem]").forEach(b=>b.onclick=()=>itemSheet(+b.dataset.additem,-1,touch));
+  $$("[data-editday]").forEach(b=>b.onclick=()=>daySheet(+b.dataset.editday,touch));
+  $("#addDay").onclick=()=>{S.routine.push({k:"Día "+(S.routine.length+1),dow:null,items:[]});touch();};
+  $("#resetR").onclick=()=>{if(!confirm("¿Volver a la rutina Torso/Pierna original? Se pierden tus cambios."))return;S.routine=JSON.parse(JSON.stringify(DEFAULT_ROUTINE));touch();};
+}
+function daySheet(di,done){
+  const d=S.routine[di];const dlg=$("#dlg");
+  dlg.innerHTML=`<h3>Editar día</h3><div class="field" style="margin-top:10px"><label for="dk">Nombre</label><input id="dk" value="${esc(d.k)}"></div>
+  <div class="field"><label for="dd">Día de la semana</label><select id="dd"><option value="">Sin día fijo</option>${DN.map((n,i)=>`<option value="${i}" ${d.dow===i?"selected":""}>${n}</option>`).join("")}</select></div>
+  <div class="row"><button class="btn danger small" id="ddel">Borrar día</button><span class="grow"></span><button class="btn ghost small" id="dc">Cancelar</button><button class="btn small" id="ds">Guardar</button></div>`;
+  dlg.showModal();$("#dc").onclick=()=>dlg.close();
+  $("#ds").onclick=()=>{d.k=$("#dk").value.trim()||d.k;const v=$("#dd").value;d.dow=v===""?null:+v;dlg.close();done();};
+  $("#ddel").onclick=()=>{if(!confirm("¿Borrar este día?"))return;S.routine.splice(di,1);dlg.close();done();};
+}
+function itemSheet(di,ii,done){
+  const it=ii>=0?S.routine[di].items[ii]:{n:"",c:[],s:3,lo:8,hi:12,rir:2,rest:90};const dlg=$("#dlg");const names=allExerciseNames();
+  const mode=it.fixed?"fixed":it.time?"time":"reps";
+  dlg.innerHTML=`<h3>${ii>=0?"Editar":"Nuevo"} ejercicio</h3>
+  <div class="field" style="margin-top:10px"><label for="in">Nombre en la rutina</label><input id="in" value="${esc(it.n)}"></div>
+  <div class="chips" id="imode" style="margin-bottom:10px">${[["reps","Series × reps"],["time","Isométrico"],["fixed","Solo texto"]].map(([v,l])=>`<button class="chip" data-mode="${v}" aria-pressed="${mode===v}">${l}</button>`).join("")}</div>
+  <div id="mReps"><div class="field"><label for="ic">Variantes (una por línea; usa la que hiciste más recientemente)</label><textarea id="ic" rows="3">${esc((it.c||[]).join("\n"))}</textarea></div>
+  <div class="field"><label for="iadd">Agregar variante desde tu historial</label><input id="iadd" list="exl2" placeholder="Busca…"><datalist id="exl2">${names.map(n=>`<option value="${esc(n)}">`).join("")}</datalist></div>
+  <div class="grid3"><div class="field"><label>Series</label><input id="is" inputmode="numeric" value="${it.s||3}"></div><div class="field rOnly"><label>Reps mín.</label><input id="ilo" inputmode="numeric" value="${it.lo||8}"></div><div class="field rOnly"><label>Reps máx.</label><input id="ihi" inputmode="numeric" value="${it.hi||12}"></div>
+  <div class="field tOnly"><label>Segundos</label><input id="itm" inputmode="numeric" value="${it.time||45}"></div>
+  <div class="field rOnly"><label>RIR meta</label><input id="ir" inputmode="numeric" value="${it.rir??2}"></div><div class="field"><label>Descanso (s)</label><input id="irest" inputmode="numeric" value="${parseRest(it.rest||90)}"></div><div class="field rOnly"><label>Principal</label><select id="im"><option value="">No</option><option value="1" ${it.main?"selected":""}>Sí</option></select></div></div></div>
+  <div id="mFixed" class="field"><label for="ifx">Texto (ej. "4×4" o "8 rondas 20/40")</label><input id="ifx" value="${esc(it.fixed||"")}"></div>
+  <div class="field"><label for="itip">Nota (opcional)</label><input id="itip" value="${esc(it.tip||it.why||"")}"></div>
+  <div class="row">${ii>=0?`<button class="btn danger small" id="idel">Borrar</button>`:""}<span class="grow"></span><button class="btn ghost small" id="icc">Cancelar</button><button class="btn small" id="iss">Guardar</button></div>`;
+  dlg.showModal();let md=mode;
+  const setMode=v=>{md=v;$$("#imode .chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===v));$("#mReps").classList.toggle("hidden",v==="fixed");$("#mFixed").classList.toggle("hidden",v!=="fixed");$$(".rOnly").forEach(x=>x.classList.toggle("hidden",v!=="reps"));$$(".tOnly").forEach(x=>x.classList.toggle("hidden",v!=="time"));};
+  setMode(mode);$$("#imode .chip").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+  $("#icc").onclick=()=>dlg.close();
+  $("#iadd").onchange=e=>{const v=e.target.value.trim();if(!v)return;const ta=$("#ic");ta.value=(ta.value.trim()?ta.value.trim()+"\n":"")+v;e.target.value="";};
+  $("#iss").onclick=()=>{
+    const c=$("#ic").value.split("\n").map(x=>x.trim()).filter(Boolean);const n=$("#in").value.trim()||c[0]||"";if(!n){toast("Ponle un nombre");return;}
+    const tip=$("#itip").value.trim();let o={n};
+    if(md==="fixed"){o.fixed=$("#ifx").value.trim()||"—";if(tip)o.why=tip;}
+    else if(md==="time"){Object.assign(o,{c:c.length?c:[n],s:parseInt($("#is").value)||3,time:parseInt($("#itm").value)||45,rest:parseInt($("#irest").value)||60});if(tip)o.tip=tip;
+      o.c.forEach(x=>{if(meta(x).type!=="time"){S.exMeta[x]={...(S.exMeta[x]||{}),type:"time"};S.mu=Date.now();}});}
+    else{Object.assign(o,{c:c.length?c:[n],s:parseInt($("#is").value)||3,lo:parseInt($("#ilo").value)||8,hi:parseInt($("#ihi").value)||12,rir:parseInt($("#ir").value)||0,rest:parseInt($("#irest").value)||90});if(o.hi<o.lo)o.hi=o.lo;if($("#im").value)o.main=1;if(tip)o.tip=tip;}
+    if(ii>=0)S.routine[di].items[ii]=o;else S.routine[di].items.push(o);dlg.close();done();};
+  const del=$("#idel");if(del)del.onclick=()=>{if(!confirm("¿Borrar este ejercicio de la rutina?"))return;S.routine[di].items.splice(ii,1);dlg.close();done();};
+}
+
+/* ================= AJUSTES ================= */
+function renderSettings(){
+  const st=S.settings;const L=live();const bws=(S.bw||[]).filter(x=>!x.del).sort((a,b)=>b.t-a.t);
+  let h=`<h2 style="margin-top:0">Peso corporal</h2><div class="panel"><p class="small muted" style="margin-top:0">Se suma al lastre en dominadas, fondos y flexiones para calcular la carga real, el 1RM y el tonelaje.</p>
+  <div class="row"><input id="bwIn" inputmode="decimal" placeholder="kg" style="flex:1;border:1px solid var(--line);background:var(--surface2);border-radius:8px;padding:10px;min-height:44px" aria-label="Peso corporal en kg"><button class="btn small" id="bwAdd">Anotar hoy</button></div>
+  ${bws.length?`<ul class="list" style="margin-top:8px">${bws.slice(0,5).map(x=>`<li class="row" style="padding:8px 0"><span class="grow">${fmtD(x.t)}</span><b>${fmt1(x.kg)} kg</b><button class="del" data-bwdel="${x.id}" aria-label="Borrar">×</button></li>`).join("")}</ul>`:`<p class="small" style="margin-bottom:0;color:var(--yellow)">Aún no anotas tu peso.</p>`}</div>
+  <h2>Durante el entrenamiento</h2><div class="panel">
+  <label class="row" style="justify-content:space-between;padding:8px 0"><span>Mantener la pantalla encendida</span><input type="checkbox" id="swake" ${st.wake?"checked":""}></label>
+  <label class="row" style="justify-content:space-between;padding:8px 0"><span>Sonido al terminar el descanso</span><input type="checkbox" id="ssound" ${st.sound?"checked":""}></label>
+  <label class="row" style="justify-content:space-between;padding:8px 0"><span>Alarma continua hasta tocar "Listo"</span><input type="checkbox" id="sloop" ${st.loop?"checked":""}></label>
+  <div class="field" style="margin-top:6px"><label for="srest">Descanso por defecto (s) para ejercicios fuera de la rutina</label><input id="srest" inputmode="numeric" value="${st.defaultRest}"></div>
+  <div class="grid3" style="grid-template-columns:1fr 2fr"><div class="field"><label for="sbar">Barra (kg)</label><input id="sbar" inputmode="decimal" value="${fmt1(st.bar)}"></div><div class="field"><label for="splates">Discos disponibles (kg)</label><input id="splates" value="${st.plates.map(fmt1).join("; ")}"></div></div></div>
+  <h2>Respaldo</h2><div class="panel"><p class="small muted" style="margin-top:0">Tus datos viven solo en este teléfono. Descarga un respaldo cada tanto y guárdalo en tu Drive o OneDrive.</p>
+  <div class="row"><button class="btn small grow" id="exjson">Descargar respaldo (.json)</button><button class="btn ghost small grow" id="excsv">Exportar CSV</button></div>
+  <div class="row" style="margin-top:8px"><label class="btn ghost small grow" style="text-align:center;display:grid;place-items:center">Restaurar respaldo<input type="file" id="imjson" accept=".json,application/json" class="sr"></label><label class="btn ghost small grow" style="text-align:center;display:grid;place-items:center">Importar de Strong<input type="file" id="imstrong" accept=".csv,.txt,.xlsx,.xls" class="sr"></label></div>
+  <p class="small muted" style="margin-bottom:0">${L.length} sesiones guardadas${st.lastBackup?` · último respaldo ${fmtD(st.lastBackup)}`:""}.</p></div>
+  <h2>Sincronización (opcional)</h2><div class="panel"><p class="small muted" style="margin-top:0">Apagada por defecto: la app no usa internet. Si quieres copia automática en un Gist privado de GitHub, pega un token con solo el permiso <b>gist</b>. El token queda solo en este teléfono.</p>
+  <div class="field"><label for="gt">Token de GitHub</label><input id="gt" type="password" autocomplete="off" value="${esc(st.token||"")}" placeholder="ghp_…"></div>
+  <div class="field"><label for="gi">ID del Gist (vacío = se crea uno nuevo)</label><input id="gi" autocomplete="off" value="${esc(st.gist||"")}"></div>
+  <div class="row"><button class="btn ghost small grow" id="gsync">Sincronizar ahora</button></div>
+  <p class="small muted" style="margin-bottom:0">${st.lastSync?"Última sincronización: "+new Date(st.lastSync).toLocaleString("es-CL"):"Sin sincronizar."}</p></div>
+  <h2>Apariencia</h2><div class="panel"><div class="chips">${[["dark","Negro"],["light","Claro"],["auto","Según el sistema"]].map(([v,l])=>`<button class="chip" data-th="${v}" aria-pressed="${(st.theme||"dark")===v}">${l}</button>`).join("")}</div></div>
+  <p class="small muted" style="text-align:center;margin-top:20px">Fierro v${APP_VER}</p>`;
+  $("#view").innerHTML=h;
+  $("#bwAdd").onclick=()=>{const kg=num($("#bwIn").value);if(!kg||kg<30||kg>250){toast("Anota un peso válido en kg");return;}const today=new Date().toDateString();
+    const ex=S.bw.find(x=>!x.del&&new Date(x.t).toDateString()===today);if(ex){ex.kg=kg;ex.u=Date.now();}else S.bw.push({id:uid(),t:Date.now(),kg,u:Date.now()});save();autoSync();toast("Peso anotado");renderSettings();};
+  $$("[data-bwdel]").forEach(b=>b.onclick=()=>{const x=S.bw.find(y=>y.id===b.dataset.bwdel);x.del=1;x.u=Date.now();save();renderSettings();});
+  $("#swake").onchange=e=>{st.wake=e.target.checked;save();};
+  $("#ssound").onchange=e=>{st.sound=e.target.checked;save();};
+  $("#sloop").onchange=e=>{st.loop=e.target.checked;save();};
+  $("#srest").onchange=e=>{st.defaultRest=parseInt(e.target.value)||90;save();};
+  $("#sbar").onchange=e=>{st.bar=num(e.target.value)||20;save();};
+  $("#splates").onchange=e=>{const p=e.target.value.split(/[;\s]+/).map(num).filter(v=>v>0);if(p.length){st.plates=p;save();}};
+  $("#gt").onchange=e=>{st.token=e.target.value.trim();save();};
+  $("#gi").onchange=e=>{st.gist=e.target.value.trim();save();};
+  $("#gsync").onclick=async()=>{st.token=$("#gt").value.trim();st.gist=$("#gi").value.trim();save();await sync(true);renderSettings();};
+  $$("[data-th]").forEach(b=>b.onclick=()=>{st.theme=b.dataset.th;save();applyTheme();renderSettings();});
+  $("#exjson").onclick=backupJSON;
+  $("#excsv").onclick=()=>download(`fierro-${new Date().toISOString().slice(0,10)}.csv`,toCSV(),"text/csv");
+  $("#imjson").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!d.sessions)throw 0;mergeRemote(migrate(d));save();toast("Respaldo restaurado y combinado");renderSettings();}catch(err){toast("Ese archivo no es un respaldo de Fierro");}};
+  $("#imstrong").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const text=/\.xlsx?$/i.test(f.name)?await xlsxToText(await f.arrayBuffer()):new TextDecoder("utf-8").decode(await f.arrayBuffer());const n=importStrong(text);save();toast(`${n} sesiones nuevas importadas`);renderSettings();}catch(err){toast(err.message||"No pude leer el archivo");}};
+}
+function download(name,content,type){const b=new Blob([content],{type});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},800);}
+function backupJSON(){const o={...S,active:null,settings:{...S.settings,token:undefined}};download(`fierro-respaldo-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(o),"application/json");S.settings.lastBackup=Date.now();save();if(view==="train")renderTrain();}
+function toCSV(){const rows=[["Fecha","Sesión","Duración (s)","Ejercicio","Serie","Tipo","Peso (kg)","Carga real (kg)","Reps","RIR","Segundos"]];
+  live().forEach(s=>{const d=new Date(s.t);const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+    s.ex.forEach(e=>{let n=0;e.sets.forEach(x=>{const l=loadOf(e.n,x.w,s.t);rows.push([ds,s.name,s.end>s.t?Math.round((s.end-s.t)/1000):"",e.n,x.k===1?"W":x.k===2?"D":++n,meta(e.n).type,x.w??"",l==null?"":Math.round(l*10)/10,x.r??"",x.rir??"",x.sec??""]);});});});
+  return rows.map(r=>r.map(v=>{v=String(v);return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}).join(";")).join("\n");}
+
+/* ================= importar Strong ================= */
+const REC=/^(\d+[;,])?"?\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/;
+function fixMojibake(s){if(!/[ÃÂ]/.test(s))return s;try{return decodeURIComponent(escape(s));}catch(e){return s;}}
+function parseCSV(text,delim){const rows=[];let row=[],f="",q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i++;}else q=false;}else if((c==="\n"||c==="\r")&&REC.test(text.slice(i+1,i+40).replace(/^\n/,""))){q=false;i--;}else f+=c;}
+    else if(c==='"')q=true;else if(c===delim){row.push(f);f="";}
+    else if(c==="\n"||c==="\r"){if(c==="\r"&&text[i+1]==="\n")i++;row.push(f);rows.push(row);row=[];f="";}else f+=c;}
+  if(f!==""||row.length){row.push(f);rows.push(row);}return rows;}
+function importStrong(text){
+  text=fixMojibake(text.replace(/^\uFEFF/,""));const first=text.split(/\r?\n/)[0];const delim=first.split(";").length>first.split(",").length?";":",";
+  const rows=parseCSV(text,delim);const H=rows[0].map(h=>h.trim().toLowerCase());const col=(...k)=>H.findIndex(h=>k.some(x=>h.includes(x)));
+  const cId=col("workout #"),cDate=col("date","fecha"),cName=col("workout name"),cDur=col("duration"),cEx=col("exercise name"),cSet=col("set order"),cW=col("weight"),cR=col("reps"),cSec=col("seconds"),cRpe=col("rpe");
+  if(cDate<0||cEx<0||cR<0)throw new Error("No encontré las columnas de Strong");
+  const lbs=cW>=0&&H[cW].includes("lb");const have=new Set(live().map(s=>Math.round(s.t/60000)));const map=new Map();
+  for(let i=1;i<rows.length;i++){const r=rows[i];const ds=(r[cDate]||"").trim();if(!/^\d{4}-\d{2}-\d{2}/.test(ds))continue;
+    const key=cId>=0?r[cId]:ds+"|"+(r[cName]||"");let s=map.get(key);
+    if(!s){const t=new Date(ds.replace(" ","T")).getTime();let dur=0;const dv=cDur>=0?r[cDur]:"";if(/^\d+$/.test((dv||"").trim()))dur=+dv;else{const h=(dv||"").match(/(\d+)\s*h/),m=(dv||"").match(/(\d+)\s*m/);dur=(h?h[1]*3600:0)+(m?m[1]*60:0);}
+      s={id:"imp"+t,t,end:t+dur*1000,name:cName>=0?(r[cName]||"").trim():"",u:Date.now(),ex:[]};map.set(key,s);}
+    const so=cSet>=0?(r[cSet]||"").trim():"";if(/rest|note/i.test(so))continue;const n=(r[cEx]||"").trim();if(!n)continue;
+    let w=cW>=0&&r[cW]!==""?parseFloat((r[cW]||"").replace(",",".")):null;if(isNaN(w))w=null;if(w!=null&&lbs)w=Math.round(w*.4536*10)/10;
+    const reps=parseInt(r[cR])||0;const sec=cSec>=0?parseInt(r[cSec])||0:0;if(!reps&&!w&&!sec)continue;
+    let l=s.ex[s.ex.length-1];if(!l||l.n!==n){l={n,sets:[]};s.ex.push(l);}const o={w,r:reps,k:so==="W"?1:so==="D"?2:0};if(sec)o.sec=sec;
+    const rpe=cRpe>=0?num(r[cRpe]):null;if(rpe)o.rir=Math.max(0,Math.round(10-rpe));l.sets.push(o);}
+  let n=0;map.forEach(s=>{if(s.ex.length&&!have.has(Math.round(s.t/60000))){S.sessions.push(s);n++;}});S.sessions.sort((a,b)=>a.t-b.t);return n;}
+async function xlsxToText(buf){
+  if(typeof XLSX==="undefined"){await new Promise((ok,ko)=>{const sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";sc.onload=ok;sc.onerror=()=>ko(new Error("Para leer Excel necesito internet una vez. Usa el .csv."));document.head.appendChild(sc);});}
+  const wb=XLSX.read(new Uint8Array(buf),{type:"array"});const ws=wb.Sheets[wb.SheetNames[0]];const aoa=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:""});
+  const head=(aoa[0]||[]).filter(x=>x!=="");if(head.length<=3&&String(head[0]||"").includes(";"))return aoa.map(r=>r.filter(x=>x!=="").join(",")).join("\n");
+  return XLSX.utils.sheet_to_csv(ws);}
+
+/* ================= sincronización opcional (Gist) ================= */
+const GFILE="fierro.json";let syncing=false;
+function payload(){return JSON.stringify({v:2,app:"fierro",sessions:S.sessions,routine:S.routine,ru:S.ru||0,bw:S.bw||[],exMeta:S.exMeta||{},mu:S.mu||0});}
+function mergeById(a,b){const m=new Map((a||[]).map(x=>[x.id,x]));(b||[]).forEach(r=>{const l=m.get(r.id);if(!l||(r.u||0)>(l.u||0))m.set(r.id,r);});return[...m.values()];}
+function mergeRemote(R){
+  S.sessions=mergeById(S.sessions,R.sessions).sort((a,b)=>a.t-b.t);
+  S.bw=mergeById(S.bw,R.bw);
+  if(R.routine&&(R.ru||0)>(S.ru||0)){S.routine=R.routine;S.ru=R.ru;}
+  if(R.exMeta&&(R.mu||0)>(S.mu||0)){S.exMeta=R.exMeta;S.mu=R.mu;}}
+async function gh(path,opt={}){const r=await fetch("https://api.github.com"+path,{...opt,headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+S.settings.token,...(opt.body?{"Content-Type":"application/json"}:{})}});
+  if(!r.ok){throw new Error(r.status===401?"Token inválido o vencido":r.status===404?"No encontré el Gist (revisa el ID y el permiso gist)":"GitHub respondió "+r.status);}return r.json();}
+async function sync(verbose){
+  const st=S.settings;if(!st.token){if(verbose)toast("Falta el token de GitHub");return;}if(syncing)return;syncing=true;syncBadge("Sincronizando…");
+  try{if(!st.gist){const g=await gh("/gists",{method:"POST",body:JSON.stringify({description:"Fierro — datos de entrenamiento",public:false,files:{[GFILE]:{content:payload()}}})});st.gist=g.id;}
+    else{const g=await gh("/gists/"+st.gist);const f=g.files&&g.files[GFILE];if(f){let c=f.content;if(f.truncated)c=await(await fetch(f.raw_url)).text();mergeRemote(migrate(JSON.parse(c)));}
+      await gh("/gists/"+st.gist,{method:"PATCH",body:JSON.stringify({files:{[GFILE]:{content:payload()}}})});}
+    st.lastSync=Date.now();st.lastBackup=Date.now();save();if(verbose)toast("Sincronizado");}
+  catch(e){if(verbose)toast(e.message||"Error al sincronizar");}
+  finally{syncing=false;syncBadge();if(view!=="settings"&&!S.active)render();}}
+function autoSync(){if(S.settings.token&&navigator.onLine)sync(false);}
+function syncBadge(t){const el=$("#syncState");if(!el)return;if(t){el.textContent=t;return;}
+  el.textContent=S.settings.token?(S.settings.lastSync?"Sincronizado "+new Date(S.settings.lastSync).toLocaleDateString("es-CL",{day:"numeric",month:"short"}):"Sin sincronizar"):"";}
+
+/* ================= tema e inicio ================= */
+function applyTheme(){document.documentElement.setAttribute("data-theme",S.settings.theme||"dark");
+  document.querySelector('meta[name="theme-color"]').setAttribute("content",css("--bg")||"#000000");}
+S=load();applyTheme();
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
+if(S.active&&!S.active.editing)wake(true);
+render();
+if(S.settings.token&&navigator.onLine&&!S.active)sync(false);
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+})();
+
+</script>
+</body>
+</html>
