@@ -152,7 +152,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 <script>
 (function(){
 "use strict";
-const APP_VER="2.0.0";
+const APP_VER="2.1.0";
 const LS="fierro_pwa_v1";
 const DAY=864e5;
 const $=s=>document.querySelector(s);
@@ -178,13 +178,15 @@ const TYPES={free:"Peso libre o máquina",bw:"Peso corporal + lastre",assist:"Pe
 function autoMeta(name){
   const n=" "+String(name).toLowerCase()+" ";const has=(...a)=>a.some(s=>n.includes(s));
   let type="free",f=1;
-  if(has("plank","plancha","hollow","isometr"," hold","l-sit","wall sit"))type="time";
+  if(has("plank","plancha","hollow","isometr"," hold","l-sit","wall sit","pogo","reacción","reaction","copenhag"))type="time";
   else if(has("assisted","asistid"))type="assist";
   else if(has("pull up","pull-up","chin up","chin-up","dominada","chest dip"," dip ","fondos","muscle up"))type="bw";
   else if(has("push up","push-up","flexiones")){type="bw";f=.64;}
   else if(has("inverted row")){type="bw";f=.6;}
   let p=null,s=[];
-  if(has("jump","pogo","skater","skip","salto","knee drive","walking ","cycling","running","sprint","cajón"))p=null;
+  if(has("jump","pogo","skater","skip","salto","knee drive","walking ","cycling","running","sprint","cajón","hop ","hop and","reacción","reaction"))p=null;
+  else if(has("pallof","copenhag","side plank","plancha lateral"))p="Core";
+  else if(has("external rotation","rotación externa"))p="Hombro";
   else if(has("plank","plancha","crunch","ab wheel","knee raise","leg raise","sit up","sit-up","roman chair","abdominal","hollow","cable crunch"))p="Core";
   else if(has("back extension"))p="Isquios",s=["Glúteos"];
   else if(has("leg curl","femoral"))p="Isquios";
@@ -227,6 +229,7 @@ const setE=(name,x,t)=>e1(loadOf(name,x.w,t),x.r,x.rir);
 function loadForReps(E,n){return n<=5?E*(37-n)/36:E/(1+n/30);}
 
 /* ================= rutina por defecto ================= */
+const ROUTINE_NAME="Torso + pierna de arquero (sept 2026)";
 const DEFAULT_ROUTINE=[
  {k:"Torso A",dow:1,items:[
   {n:"Press banca o plano con mancuernas",c:["Bench Press (Dumbbell)","Bench Press (Barbell)"],s:4,lo:6,hi:8,rir:2,rest:150,main:1},
@@ -235,29 +238,43 @@ const DEFAULT_ROUTINE=[
   {n:"Remo",c:["Seated Row (Machine)","Bent Over One Arm Row (Dumbbell)","Seated Row (Cable)"],s:3,lo:10,hi:12,rir:2,rest:90},
   {n:"Elevaciones laterales",c:["Lateral Raise (Dumbbell)","Lateral Raise (Cable)"],s:3,lo:12,hi:15,rir:1,rest:60},
   {n:"Fondos o extensión de tríceps",c:["Chest Dip","Triceps Extension (Rope, 5 placas)","Triceps Pushdown (Cable - Straight Bar)"],s:3,lo:8,hi:12,rir:2,rest:90},
+  {n:"Rotación externa (por brazo)",c:["External Rotation (Cable)","External Rotation (Band)"],s:3,lo:10,hi:12,rir:2,rest:60,tip:"Bajando lento."},
+  {n:"Face pull",c:["Face Pull (Cable)"],s:3,lo:12,hi:15,rir:2,rest:60},
+  {n:"Press Pallof (por lado)",c:["Pallof Press (Cable)","Pallof Press (Band)"],s:3,lo:10,hi:12,rir:2,rest:60},
   {n:"Finisher",fixed:"8–9 rondas de 20 s fuerte / 40 s suave",why:"Bici o cuerda."}]},
- {k:"Pierna A",dow:2,items:[
-  {n:"Saltos al cajón",fixed:"4×4",why:"Primero y fresco. Calidad y altura, nunca al fallo."},
-  {n:"Sentadilla",c:["Squat (Barbell)","Squat (Smith Machine)"],s:4,lo:6,hi:8,rir:2,rest:180,main:1},
-  {n:"Prensa",c:["Leg Press","Seated Leg Press (Machine)"],s:3,lo:10,hi:12,rir:2,rest:120},
-  {n:"Búlgaras (por pierna)",c:["Bulgarian Split Squat"],s:3,lo:8,hi:10,rir:2,rest:90},
-  {n:"Extensión de cuádriceps",c:["Leg Extension (Machine)"],s:3,lo:12,hi:15,rir:1,rest:90},
-  {n:"Gemelos",c:["Seated Calf Raise (Machine)","Standing Calf Raise (Dumbbell)","Calf Press on Seated Leg Press"],s:4,lo:12,hi:15,rir:1,rest:60}]},
+ {k:"Pierna fuerza",dow:2,items:[
+  {n:"Pogo hops",c:["Pogo Hops"],s:3,time:15,rest:60,np:1,tip:"Rebote corto y rígido de tobillo."},
+  {n:"Salto al cajón",c:["Box Jump"],s:3,lo:5,hi:5,rir:3,rest:90,np:1,tip:"Caída suave y bajas caminando."},
+  {n:"Sentadilla",c:["Squat (Barbell)","Squat (Smith Machine)"],s:4,lo:5,hi:5,rir:2,rest:180,main:1,tip:"Subida lo más rápido posible. Anota el RIR: con 4 o más en reserva sube la carga."},
+  {n:"Peso muerto rumano",c:["Romanian Deadlift (Barbell)","Romanian Deadlift (Dumbbell)"],s:3,lo:8,hi:8,rir:2,rest:150,tip:"Bajada en 3 s. Anota el RIR para saber cuándo subir."},
+  {n:"Búlgara (opcional, por pierna)",c:["Bulgarian Split Squat"],s:3,lo:8,hi:8,rir:2,rest:90},
+  {n:"Copenhague rodilla apoyada (por lado)",c:["Copenhagen Plank (Short Lever)"],s:3,time:20,rest:60,tip:"Tras 3 semanas sin dolor: 2×8 subiendo y bajando con la rodilla apoyada."}]},
  {k:"Torso B",dow:3,items:[
   {n:"Dominadas con lastre o jalón",c:["Lat Pulldown (Cable)","Pull Up","Chin Up"],s:4,lo:6,hi:8,rir:2,rest:150,main:1},
   {n:"Remo con barra",c:["Bent Over Row (Barbell)","Seated Row (Machine)","T Bar Row"],s:4,lo:8,hi:10,rir:2,rest:120},
   {n:"Press inclinado",c:["Incline Chest Press (Machine)","Incline Bench Press (Dumbbell)","Incline Bench Press (Barbell)"],s:3,lo:8,hi:10,rir:2,rest:120},
-  {n:"Face pull o aperturas posteriores",c:["Face Pull (Cable)","reverse pec deck","Reverse Fly (Dumbbell)"],s:3,lo:12,hi:15,rir:1,rest:90},
+  {n:"Face pull",c:["Face Pull (Cable)","reverse pec deck","Reverse Fly (Dumbbell)"],s:3,lo:12,hi:15,rir:2,rest:90},
   {n:"Curl de bíceps",c:["Bicep Curl (Dumbbell)","Bicep Curl (Barbell)","hammer preacher curl","Preacher Curl (Machine)","bayesian cable curl"],s:3,lo:10,hi:12,rir:1,rest:120,tip:"Descansa completo: tu bíceps se fatiga rápido."},
   {n:"Elevaciones laterales",c:["Lateral Raise (Dumbbell)","Lateral Raise (Cable)"],s:3,lo:12,hi:15,rir:1,rest:60},
+  {n:"Rotación externa (por brazo)",c:["External Rotation (Cable)","External Rotation (Band)"],s:3,lo:10,hi:12,rir:2,rest:60,tip:"Bajando lento."},
+  {n:"Plancha lateral (por lado)",c:["Side Plank"],s:3,time:30,rest:45},
   {n:"Finisher",fixed:"8–9 rondas de 20 s fuerte / 40 s suave",why:"Igual que el lunes."}]},
- {k:"Pierna B",dow:4,items:[
-  {n:"Peso muerto rumano",c:["Romanian Deadlift (Barbell)","Romanian Deadlift (Dumbbell)"],s:4,lo:8,hi:10,rir:2,rest:150,main:1},
-  {n:"Hip thrust",c:["Hip Thrust (Barbell)"],s:3,lo:10,hi:12,rir:2,rest:120},
-  {n:"Curl femoral",c:["Seated Leg Curl (Machine)","Lying Leg Curl (Machine)"],s:3,lo:12,hi:15,rir:1,rest:90},
-  {n:"Zancadas caminando (por pierna)",c:["Walking Lunge (Dumbbell)","smith machine lunge"],s:3,lo:10,hi:12,rir:2,rest:90},
-  {n:"Gemelos",c:["Seated Calf Raise (Machine)","Standing Calf Raise (Dumbbell)","Calf Press on Seated Leg Press"],s:3,lo:12,hi:15,rir:1,rest:60},
-  {n:"Plancha",c:["Plank"],s:3,time:45,rest:60}]}
+ {k:"Pierna potencia",dow:4,items:[
+  {n:"Pogo hops",c:["Pogo Hops"],s:2,time:15,rest:60,np:1},
+  {n:"Hop and stick lateral (por pierna)",c:["Lateral Hop and Stick"],s:3,lo:5,hi:5,rir:3,rest:60,np:1,tip:"Aterrizas en una pierna y aguantas 3 s."},
+  {n:"Skater jumps",c:["Skater Jump"],s:3,lo:6,hi:6,rir:3,rest:60,np:1,tip:"3 por lado, máxima distancia."},
+  {n:"Zancada lateral o sentadilla cosaca (por pierna)",c:["Lateral Lunge (Dumbbell)","Cossack Squat"],s:3,lo:6,hi:6,rir:3,rest:90,tip:"Carga moderada."},
+  {n:"Reacción con pared",c:["Reacción con pared"],s:3,time:30,rest:45,np:1,tip:"Pelota de tenis contra la pared desde 2 m, en postura de arquero. Varía ángulo y fuerza."}]},
+ {k:"Partido mañana",dow:null,items:[
+  {n:"Pogo hops",c:["Pogo Hops"],s:2,time:10,rest:60,np:1},
+  {n:"Sentadilla",c:["Squat (Barbell)","Squat (Smith Machine)"],s:2,lo:3,hi:3,rir:4,rest:150,np:1,pct:.8,tip:"Carga moderada, subida explosiva."},
+  {n:"Skater jumps (por lado)",c:["Skater Jump"],s:2,lo:2,hi:2,rir:4,rest:60,np:1},
+  {n:"Nada más",fixed:"Sin rumano, sin búlgara y sin Copenhague.",why:"Reemplaza el día de pierna."}]},
+ {k:"Calentamiento partido",dow:null,items:[
+  {n:"Trote con desplazamientos",fixed:"3 min",why:"Laterales y hacia atrás."},
+  {n:"Movilidad",fixed:"3 min",why:"Plancha lateral 20 s por lado, zancadas con rotación y círculos de brazos."},
+  {n:"Activación",fixed:"2 min",why:"Pogo hops 2×10 s y 3 saltos laterales cayendo en postura de arquero."},
+  {n:"Pelotas",fixed:"2 min",why:"Al cuerpo y a los lados, o contra la pared si estás solo."}]}
 ];
 
 /* ================= estado ================= */
@@ -275,7 +292,7 @@ function seedState(){
     e.sets.forEach(([n,w,r,a,k])=>{let last=s.ex[s.ex.length-1];if(!last||last.n!==n){last={n,sets:[]};s.ex.push(last);}for(let q=0;q<k;q++){const o={w,r,k:0};if(a)o.a=1;last.sets.push(o);}});
     sessions.push(s);});
   sessions.sort((a,b)=>a.t-b.t);
-  return{v:2,sessions,routine:JSON.parse(JSON.stringify(DEFAULT_ROUTINE)),ru:0,active:null,bw:[],exMeta:{},mu:0,
+  return{v:3,sessions,routine:JSON.parse(JSON.stringify(DEFAULT_ROUTINE)),ru:0,active:null,bw:[],exMeta:{},mu:0,
     settings:{wake:true,sound:true,loop:true,defaultRest:90,theme:"dark",bar:20,plates:[25,20,15,10,5,2.5,1.25]}};
 }
 function migrate(s){
@@ -285,6 +302,7 @@ function migrate(s){
     s.settings={loop:true,theme:"dark",bar:20,plates:[25,20,15,10,5,2.5,1.25],...s.settings};
     s.v=2;
   }
+  if(s.v<3){if(!s.ru)s.routine=JSON.parse(JSON.stringify(DEFAULT_ROUTINE));else s.newRoutine=1;s.v=3;}
   return s;
 }
 function load(){try{const r=localStorage.getItem(LS);if(r){const s=JSON.parse(r);if(s&&s.sessions)return migrate(s);}}catch(e){}return seedState();}
@@ -309,18 +327,22 @@ function recommend(it,ex,excl){
   const m=meta(ex);const L=lastOf(ex,excl);const mid=Math.round((it.lo+it.hi)/2);
   const base={L,lastTxt:L?`${fmtD(L.t)}: `+L.sets.map(x=>setTxt(x,ex)).join(", "):""};
   const rows=(w,r)=>Array.from({length:it.s||3},()=>({w,r}));
+  if(m.type==="time"&&it.np)return{...base,badge:["new","Calidad"],why:it.tip||"Calidad, no volumen.",rows:rows(null,0).map(r=>({...r,sec:it.time||15}))};
   if(m.type==="time"){const goal=it.time||45;
     if(!L)return{...base,badge:["new","Sin registro"],why:`Apunta a ${goal} s por serie.`,rows:rows(null,0).map(r=>({...r,sec:goal}))};
     const secs=L.sets.map(x=>x.sec||x.r||0);const mn=Math.min(...secs);
     const next=mn>=goal?Math.max(goal,mn)+10:Math.min(goal,mn+5);
     return{...base,badge:[mn>=goal?"up":"keep",mn>=goal?"Sube":"Mantén"],why:mn>=goal?`Aguantaste ${secs.join("-")} s. Sube a ${next} s.`:`Hiciste ${secs.join("-")} s. Busca ${next} s en cada serie.`,rows:rows(null,0).map(r=>({...r,sec:next}))};}
+  if(it.np){let w=null;const w0n=L?Math.max(0,...L.sets.map(x=>x.w||0)):0;if(it.pct&&w0n)w=roundTo(it.pct*w0n,stepFor(ex,w0n));
+    return{...base,badge:["new","Calidad"],why:(it.pct&&w?`${fmt1(w)} kg (≈${Math.round(it.pct*100)}% de tu última carga). `:"")+(it.tip||"Aquí no se sube volumen: busca más altura, distancia o velocidad."),rows:rows(w,it.lo)};}
   if(!L)return{...base,badge:["new","Sin registro"],why:"Parte liviano, con 3 reps en reserva. Lo que anotes hoy será tu base.",rows:rows(null,it.lo)};
+
   const w0=Math.max(...L.sets.map(x=>x.w||0));
   const top=L.sets.filter(x=>(x.w||0)===w0);const reps=top.map(x=>x.r);
   const rirs=top.map(x=>x.rir).filter(v=>v!=null);
   const plus1=w=>Array.from({length:it.s},(_,i)=>({w,r:Math.min(it.hi,(reps[i]??reps[reps.length-1])+1)}));
   const days=(Date.now()-L.t)/DAY;const assumed=L.sets.some(x=>x.a);
-  const allTop=reps.every(r=>r>=it.hi)&&!assumed;
+  const allTop=!assumed&&((it.hi>it.lo&&reps.every(r=>r>=it.hi))||reps.every(r=>r>=it.hi+2));
   const tooEasy=!assumed&&rirs.length===top.length&&Math.min(...rirs)>=it.rir+2&&reps.every(r=>r>=it.lo);
   const E=Math.max(0,...L.sets.map(x=>setE(ex,x,L.t).v));
   const rirNote=tooEasy&&!allTop?` Anotaste RIR ${Math.min(...rirs)}: te sobraban reps.`:"";
@@ -343,7 +365,8 @@ function recommend(it,ex,excl){
   /* ---- peso libre / máquina ---- */
   if(!w0)return{...base,badge:["keep","Anota el peso"],why:"La vez pasada no quedó el peso. Usa el mismo y anótalo hoy.",rows:plus1(null)};
   const step=stepFor(ex,w0);
-  if(days>60){const w=Math.max(step,roundTo(0.8*loadForReps(E,mid+3),step));
+  const minW=isBarbell(ex)&&!/smith/i.test(ex)?S.settings.bar:step;
+  if(days>60){const w=Math.max(minW,roundTo(0.8*loadForReps(E,mid+3),step));
     return{...base,badge:["new","Retomando"],why:`Tu último registro es de hace ${Math.round(days/30)} meses. Parte con ${fmt1(w)} kg dejando 3 en reserva.`,rows:rows(w,it.lo)};}
   if(allTop||tooEasy){
     let w=roundTo(loadForReps(E,mid+it.rir),step);w=Math.max(w,w0+step);w=Math.min(w,w0+2*step);
@@ -351,8 +374,9 @@ function recommend(it,ex,excl){
       return{...base,badge:["split","Salto grande"],why:`De ${fmt1(w0)} a ${fmt1(w)} kg es +${Math.round((w-w0)/w0*100)}%. Primera serie con ${fmt1(w)} kg (${Math.max(6,it.lo-4)}–${it.lo} reps) y el resto con ${fmt1(w0)}. Cuando saques ${it.lo} con ${fmt1(w)}, pasa dos series a ese peso.`,rows:r};}
     const over=reps[0]>=it.hi+3;
     return{...base,badge:["up","Sube"],why:(over?`Sacaste ${reps.join("-")} con ${fmt1(w0)} kg, muy sobre el rango. Tu 1RM estimado ronda ${fmt1(Math.round(E*10)/10)} kg: ${fmt1(w)} kg te deja en ${it.lo}–${it.hi} con RIR ${it.rir}.`:allTop?`Completaste el tope (${reps.join("-")}). Sube a ${fmt1(w)} kg y vuelve a ${it.lo}.`:`Sube a ${fmt1(w)} kg.`)+rirNote,rows:rows(w,it.lo)};}
-  if(reps[0]<it.lo-2){const w=Math.max(step,w0-step);return{...base,badge:["down","Baja"],why:`Con ${fmt1(w0)} kg quedaste bajo el rango (${reps.join("-")}). Baja a ${fmt1(w)} kg.`,rows:rows(w,it.lo)};}
+  if(reps[0]<it.lo-2){const w=Math.max(minW,w0-step);return{...base,badge:["down","Baja"],why:`Con ${fmt1(w0)} kg quedaste bajo el rango (${reps.join("-")}). Baja a ${fmt1(w)} kg.`,rows:rows(w,it.lo)};}
   if(assumed)return{...base,badge:["keep","Mantén"],why:"Mismo peso. Las reps de la vez pasada no quedaron anotadas; hoy anota las reales.",rows:rows(w0,it.lo)};
+  if(it.lo===it.hi)return{...base,badge:["keep","Mantén"],why:rirs.length?`Hiciste ${reps.join("-")} con RIR ${rirs.join("-")}. Mismo peso: sube cuando te sobren 4 o más.`:`Mismo peso. Anota el RIR de cada serie: con 4 o más en reserva te subo la carga.`,rows:rows(w0,it.lo)};
   return{...base,badge:["keep","Mantén"],why:`Hiciste ${reps.join("-")}. Mismo peso, 1 rep más en las series que no llegaron a ${it.hi}.`,rows:plus1(w0)};
 }
 function pickVariant(it,excl){const withH=it.c.map(c=>({c,L:lastOf(c,excl)})).filter(x=>x.L);if(!withH.length)return it.c[0];withH.sort((a,b)=>b.L.t-a.L.t);return withH[0].c;}
@@ -372,6 +396,7 @@ function render(){({train:renderTrain,history:renderHistory,progress:renderProgr
 function summarizeRows(rows,ex){const m=meta(ex);
   if(m.type==="time")return`${rows.length}× ${rows[0].sec} s`;
   const lab=w=>w==null?(m.type==="bw"?"peso corporal":"—"):(m.type==="bw"?"+"+fmt1(w)+" kg":m.type==="assist"?"asist. "+fmt1(w)+" kg":fmt1(w)+" kg");
+  if(rows.every(r=>r.w==null)&&m.type==="free")return`${rows.length}×${rows[0].r}`;
   const g=[];rows.forEach(r=>{const k=lab(r.w);const l=g[g.length-1];if(l&&l.k===k)l.n++;else g.push({k,n:1});});
   return g.map(x=>`${x.n}× ${x.k}`).join(" + ");}
 function renderTrain(){
@@ -387,7 +412,7 @@ function renderTrain(){
   if(day)day.items.forEach(it=>{
     if(it.fixed){h+=`<div class="card" style="--gc:var(--slate)"><h3>${esc(it.n)}</h3><p class="why"><b>${esc(it.fixed)}</b> · ${esc(it.why||"")}</p></div>`;return;}
     const ex=pickVariant(it);const R=recommend(it,ex);const m=meta(ex);
-    h+=`<div class="card" style="--gc:${groupColor(ex)}"><h3>${esc(it.n)}</h3><div class="small muted">${esc(ex)}</div><p class="why" style="font-size:17px;margin-top:6px"><b>${summarizeRows(R.rows,ex)}</b>${m.type==="time"?"":` · ${it.lo===it.hi?it.lo:it.lo+"–"+it.hi} reps · RIR ${it.rir}`}</p><p class="why"><span class="badge b-${R.badge[0]}">${R.badge[1]}</span>${esc(R.why)}</p>${R.lastTxt?`<p class="last">Última vez ${esc(R.lastTxt)}</p>`:""}</div>`;});
+    h+=`<div class="card" style="--gc:${groupColor(ex)}"><h3>${esc(it.n)}</h3><div class="small muted">${esc(ex)}</div><p class="why" style="font-size:17px;margin-top:6px"><b>${summarizeRows(R.rows,ex)}</b>${m.type==="time"||it.np?"":` · ${it.lo===it.hi?it.lo:it.lo+"–"+it.hi} reps · RIR ${it.rir}`}</p><p class="why"><span class="badge b-${R.badge[0]}">${R.badge[1]}</span>${esc(R.why)}</p>${R.lastTxt?`<p class="last">Última vez ${esc(R.lastTxt)}</p>`:""}</div>`;});
   h+=`<div style="height:8px"></div>`;
   $("#view").innerHTML=h;
   $$("[data-day]").forEach(b=>b.onclick=()=>{pickDay=b.dataset.day;renderTrain();renderDock();});
@@ -403,7 +428,7 @@ function startSession(dayKey,editing){
   S.active=act;save();wake(true);renderTrain();renderDock();
 }
 function buildEx(it,ex,excl){const R=recommend(it,ex,excl);const m=meta(ex);
-  return{n:ex,slot:it.n,c:it.c,it:{s:it.s||3,lo:it.lo,hi:it.hi,rir:it.rir,rest:it.rest,main:it.main,tip:it.tip,time:it.time},rec:{b:R.badge,why:R.why,last:R.lastTxt},
+  return{n:ex,slot:it.n,c:it.c,it:{s:it.s||3,lo:it.lo,hi:it.hi,rir:it.rir,rest:it.rest,main:it.main,tip:it.tip,time:it.time,np:it.np,pct:it.pct},rec:{b:R.badge,why:R.why,last:R.lastTxt},
     sets:R.rows.map(r=>m.type==="time"?{sec:r.sec,k:0,sug:1}:{w:r.w,r:r.r,k:0,sug:1})};}
 function prevSetTxt(e,idx,excl){const L=lastOf(e.n,excl);if(!L)return"";const x=L.sets[idx];return x?setTxt(x,e.n):"";}
 function renderActive(){
@@ -702,9 +727,10 @@ function exMetaSheet(name,done){
 const DN=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
 function renderRoutine(){
   let h=`<p class="muted" style="margin-top:0">Edita días, ejercicios, series y rangos. Las recomendaciones salen de aquí.</p>`;
+  if(S.newRoutine)h+=`<div class="banner"><span class="grow small">Hay una rutina nueva: ${ROUTINE_NAME}. Reemplaza tu rutina editada.</span><button class="btn small" id="loadNew">Cargar</button><button class="del" id="skipNew" aria-label="Descartar">×</button></div>`;
   S.routine.forEach((d,di)=>{
     h+=`<h2 class="row"><span class="grow">${esc(d.k)}</span><span class="small muted" style="font:400 14px Barlow,'Segoe UI',Roboto,Arial,sans-serif">${d.dow!=null?DN[d.dow]:"sin día"}</span><button class="icon" data-editday="${di}" aria-label="Editar día">✎</button></h2><div class="panel" style="padding:4px 12px">`;
-    d.items.forEach((it,ii)=>{const desc=it.fixed?esc(it.fixed):it.time?`${it.s}×${it.time} s · ${esc((it.c||[]).join(" / "))}`:`${it.s}×${it.lo}–${it.hi} · RIR ${it.rir} · ${mmss(parseRest(it.rest))} · ${esc((it.c||[]).join(" / "))}`;
+    d.items.forEach((it,ii)=>{const desc=it.fixed?esc(it.fixed):it.time?`${it.s}×${it.time} s${it.np?" · calidad":""} · ${esc((it.c||[]).join(" / "))}`:`${it.s}×${it.lo===it.hi?it.lo:it.lo+"–"+it.hi}${it.np?" · calidad":" · RIR "+it.rir} · ${mmss(parseRest(it.rest))} · ${esc((it.c||[]).join(" / "))}`;
       h+=`<div class="ritem"><div class="grow"><div class="t">${esc(it.n)}</div><div class="d">${desc}</div></div><button class="icon" data-up="${di}.${ii}" aria-label="Subir">↑</button><button class="icon" data-edit="${di}.${ii}" aria-label="Editar">✎</button></div>`;});
     h+=`<button class="link" data-additem="${di}">+ Agregar ejercicio</button></div>`;});
   h+=`<div class="row" style="margin-top:16px"><button class="btn ghost small grow" id="addDay">+ Nuevo día</button><button class="btn ghost small grow" id="resetR">Restaurar original</button></div>`;
@@ -715,7 +741,8 @@ function renderRoutine(){
   $$("[data-additem]").forEach(b=>b.onclick=()=>itemSheet(+b.dataset.additem,-1,touch));
   $$("[data-editday]").forEach(b=>b.onclick=()=>daySheet(+b.dataset.editday,touch));
   $("#addDay").onclick=()=>{S.routine.push({k:"Día "+(S.routine.length+1),dow:null,items:[]});touch();};
-  $("#resetR").onclick=()=>{if(!confirm("¿Volver a la rutina Torso/Pierna original? Se pierden tus cambios."))return;S.routine=JSON.parse(JSON.stringify(DEFAULT_ROUTINE));touch();};
+  const ln=$("#loadNew");if(ln){ln.onclick=()=>{if(!confirm("¿Reemplazar tu rutina actual por la nueva?"))return;S.routine=JSON.parse(JSON.stringify(DEFAULT_ROUTINE));delete S.newRoutine;touch();};$("#skipNew").onclick=()=>{delete S.newRoutine;save();renderRoutine();};}
+  $("#resetR").onclick=()=>{if(!confirm("¿Volver a la rutina original ("+ROUTINE_NAME+")? Se pierden tus cambios."))return;S.routine=JSON.parse(JSON.stringify(DEFAULT_ROUTINE));touch();};
 }
 function daySheet(di,done){
   const d=S.routine[di];const dlg=$("#dlg");

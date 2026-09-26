@@ -1,4 +1,4 @@
-# Fierro v2
+# Fierro v2.1
 
 App de entrenamiento personal, offline, instalable en Android.
 
@@ -7,7 +7,7 @@ App de entrenamiento personal, offline, instalable en Android.
 2. Settings → Pages → rama `main`, carpeta `/ (root)` (si ya estaba activo, no toques nada).
 3. Abre `https://TU-USUARIO.github.io/fierro/` en Chrome → menú ⋮ → **Instalar app**.
 
-Si ya tenías instalada la v1, se actualiza sola al abrirla con internet (el `sw.js` cambió a `fierro-v2.0.0`) y conserva tus datos.
+Si ya tenías instalada la v1, se actualiza sola al abrirla con internet (el `sw.js` cambió a `fierro-v2.1.0`) y conserva tus datos.
 
 ## Primer uso
 - Ajustes → **Peso corporal**: anótalo para que dominadas y fondos calculen la carga real.
