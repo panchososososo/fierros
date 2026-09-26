@@ -152,7 +152,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 <script>
 (function(){
 "use strict";
-const APP_VER="2.1.0";
+const APP_VER="2.1.2";
 const LS="fierro_pwa_v1";
 const DAY=864e5;
 const $=s=>document.querySelector(s);
@@ -406,6 +406,7 @@ function renderTrain(){
   let h="";
   const lb=S.settings.lastBackup||0;const nSess=live().length;
   if(nSess&&Date.now()-lb>14*DAY&&!S.settings.token)h+=`<div class="banner"><span class="grow small">${lb?`Tu último respaldo fue hace ${Math.floor((Date.now()-lb)/DAY)} días.`:"Aún no descargas un respaldo de tus datos."} Todo vive solo en este teléfono.</span><button class="btn small" id="bk">Respaldar</button></div>`;
+  if(!isStandalone()&&deferredPrompt)h+=`<div class="banner" style="border-left-color:var(--green)"><span class="grow small">Fierro se puede instalar como app.</span><button class="btn go small" id="instTop">Instalar</button></div>`;
   h+=`<div class="chips" role="group" aria-label="Día">${S.routine.map(r=>`<button class="chip" aria-pressed="${r.k===pickDay}" data-day="${esc(r.k)}">${esc(r.k)}</button>`).join("")}</div>`;
   h+=`<p class="muted" style="margin:10px 0 12px">${pickDay===nd.k?"Próxima sesión: "+nd.date.toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long"}):"Otro día de la rutina"}</p>`;
   h+=`<h2 style="margin-top:4px">Lo que toca</h2>`;
@@ -417,6 +418,7 @@ function renderTrain(){
   $("#view").innerHTML=h;
   $$("[data-day]").forEach(b=>b.onclick=()=>{pickDay=b.dataset.day;renderTrain();renderDock();});
   const bk=$("#bk");if(bk)bk.onclick=backupJSON;
+  const it=$("#instTop");if(it)it.onclick=doInstall;
 }
 function startSession(dayKey,editing){
   if(editing){const s=S.sessions.find(x=>x.id===editing);S.active={id:s.id,editing:true,t:s.t,end:s.end,name:s.name,notes:s.notes,ex:s.ex.map(e=>({...e,sets:e.sets.map(x=>({...x,done:true}))}))};save();go("train");return;}
@@ -786,7 +788,8 @@ function itemSheet(di,ii,done){
 /* ================= AJUSTES ================= */
 function renderSettings(){
   const st=S.settings;const L=live();const bws=(S.bw||[]).filter(x=>!x.del).sort((a,b)=>b.t-a.t);
-  let h=`<h2 style="margin-top:0">Peso corporal</h2><div class="panel"><p class="small muted" style="margin-top:0">Se suma al lastre en dominadas, fondos y flexiones para calcular la carga real, el 1RM y el tonelaje.</p>
+  let h=`<h2 style="margin-top:0">Instalación</h2><div class="panel">${isStandalone()?`<p style="margin:0">Fierro ya está instalada como app.</p>`:`<button class="btn go full" id="instBtn">Instalar Fierro</button>`}<button class="btn ghost small full" id="diagBtn" style="margin-top:8px">Revisar por qué no se instala</button><div id="diagOut" style="margin-top:8px"></div></div>
+  <h2>Peso corporal</h2><div class="panel"><p class="small muted" style="margin-top:0">Se suma al lastre en dominadas, fondos y flexiones para calcular la carga real, el 1RM y el tonelaje.</p>
   <div class="row"><input id="bwIn" inputmode="decimal" placeholder="kg" style="flex:1;border:1px solid var(--line);background:var(--surface2);border-radius:8px;padding:10px;min-height:44px" aria-label="Peso corporal en kg"><button class="btn small" id="bwAdd">Anotar hoy</button></div>
   ${bws.length?`<ul class="list" style="margin-top:8px">${bws.slice(0,5).map(x=>`<li class="row" style="padding:8px 0"><span class="grow">${fmtD(x.t)}</span><b>${fmt1(x.kg)} kg</b><button class="del" data-bwdel="${x.id}" aria-label="Borrar">×</button></li>`).join("")}</ul>`:`<p class="small" style="margin-bottom:0;color:var(--yellow)">Aún no anotas tu peso.</p>`}</div>
   <h2>Durante el entrenamiento</h2><div class="panel">
@@ -807,6 +810,8 @@ function renderSettings(){
   <h2>Apariencia</h2><div class="panel"><div class="chips">${[["dark","Negro"],["light","Claro"],["auto","Según el sistema"]].map(([v,l])=>`<button class="chip" data-th="${v}" aria-pressed="${(st.theme||"dark")===v}">${l}</button>`).join("")}</div></div>
   <p class="small muted" style="text-align:center;margin-top:20px">Fierro v${APP_VER}</p>`;
   $("#view").innerHTML=h;
+  const ib=$("#instBtn");if(ib)ib.onclick=doInstall;
+  $("#diagBtn").onclick=async()=>{$("#diagOut").innerHTML=`<p class="muted small">Revisando…</p>`;$("#diagOut").innerHTML=await runDiag();};
   $("#bwAdd").onclick=()=>{const kg=num($("#bwIn").value);if(!kg||kg<30||kg>250){toast("Anota un peso válido en kg");return;}const today=new Date().toDateString();
     const ex=S.bw.find(x=>!x.del&&new Date(x.t).toDateString()===today);if(ex){ex.kg=kg;ex.u=Date.now();}else S.bw.push({id:uid(),t:Date.now(),kg,u:Date.now()});save();autoSync();toast("Peso anotado");renderSettings();};
   $$("[data-bwdel]").forEach(b=>b.onclick=()=>{const x=S.bw.find(y=>y.id===b.dataset.bwdel);x.del=1;x.u=Date.now();save();renderSettings();});
@@ -885,6 +890,32 @@ async function sync(verbose){
 function autoSync(){if(S.settings.token&&navigator.onLine)sync(false);}
 function syncBadge(t){const el=$("#syncState");if(!el)return;if(t){el.textContent=t;return;}
   el.textContent=S.settings.token?(S.settings.lastSync?"Sincronizado "+new Date(S.settings.lastSync).toLocaleDateString("es-CL",{day:"numeric",month:"short"}):"Sin sincronizar"):"";}
+
+
+/* ================= instalación: botón y diagnóstico ================= */
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;if(view==="train"&&!S.active)renderTrain();if(view==="settings")renderSettings();});
+window.addEventListener("appinstalled",()=>{deferredPrompt=null;toast("Fierro quedó instalada");render();});
+const isStandalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+async function doInstall(){if(!deferredPrompt){toast("Chrome todavía no ofrece instalar. Revisa el diagnóstico en Ajustes.");return;}deferredPrompt.prompt();const r=await deferredPrompt.userChoice;deferredPrompt=null;if(r.outcome!=="accepted")toast("Instalación cancelada");}
+async function runDiag(){
+  const out=[];const ok=(b,t)=>out.push(`<li style="padding:6px 0">${b?"✅":"❌"} ${t}</li>`);
+  ok(true,"Versión de la app: "+APP_VER);
+  ok(isStandalone(),isStandalone()?"Abierta como app instalada":"Abierta en el navegador (no instalada)");
+  const ua=navigator.userAgent;const brave=!!navigator.brave;const samsung=/SamsungBrowser/.test(ua);
+  ok(!brave&&!samsung&&/Chrome\//.test(ua),brave?"Navegador: Brave (no instala apps bien, usa Chrome)":samsung?"Navegador: Samsung Internet":"Navegador: "+((ua.match(/Chrome\/[\d.]+/)||["desconocido"])[0]));
+  ok(location.protocol==="https:","Conexión segura (https)");
+  let man=null;
+  try{const r=await fetch("manifest.json?d="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("HTTP "+r.status);man=await r.json();ok(true,`manifest.json leído: "${man.name}"`);}catch(e){ok(false,"No se pudo leer manifest.json ("+e.message+")");}
+  const link=document.querySelector('link[rel="manifest"]');ok(!!link,"La página enlaza el manifest ("+(link?link.getAttribute("href"):"falta")+")");
+  if(man&&man.icons){for(const ic of man.icons){const res=await new Promise(res=>{const im=new Image();im.onload=()=>res(im.naturalWidth+"×"+im.naturalHeight);im.onerror=()=>res(null);im.src=ic.src+"?d="+Date.now();});
+    const want=(ic.sizes||"").replace("x","×");ok(res&&res===want,`Ícono ${ic.src}: ${res?res+" px":"no carga"}${res&&res!==want?" (debería ser "+want+")":""}`);}}
+  if("serviceWorker" in navigator){try{const reg=await navigator.serviceWorker.getRegistration();ok(!!(reg&&reg.active),reg?(reg.active?"Service worker activo":"Service worker registrado pero no activo ("+(reg.installing?"instalando":reg.waiting?"esperando":"sin estado")+")"):"Service worker no registrado");
+    ok(!!navigator.serviceWorker.controller,navigator.serviceWorker.controller?"La página está controlada por el service worker":"La página aún no está controlada por el service worker (recarga una vez)");}catch(e){ok(false,"Error revisando el service worker: "+e.message);}}
+  else ok(false,"Este navegador no soporta service workers");
+  ok(!!deferredPrompt||isStandalone(),deferredPrompt?"Chrome dice que se puede instalar: usa el botón de arriba":"Chrome todavía no avisa que se pueda instalar");
+  return`<ul class="list" style="margin:0">${out.join("")}</ul>`;
+}
 
 /* ================= tema e inicio ================= */
 function applyTheme(){document.documentElement.setAttribute("data-theme",S.settings.theme||"dark");
