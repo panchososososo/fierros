@@ -1,5 +1,5 @@
 // Fierro service worker: funciona sin conexión.
-const CACHE = "fierro-v2.1.2";
+const CACHE = "fierro-v3.0.0";
 const SHELL = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png"];
 
 self.addEventListener("install", e => {
@@ -10,7 +10,17 @@ self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 
-function timeout(ms) { return new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms)); }
+// Guarda la página nueva y, si cambió, avisa a la app abierta para que muestre "hay una versión nueva".
+async function store(res) {
+  const ca = await caches.open(CACHE);
+  const old = await ca.match("index.html");
+  const [nuevo, viejo] = await Promise.all([res.clone().text(), old ? old.text() : ""]);
+  await ca.put("index.html", res);
+  if (old && nuevo !== viejo) {
+    await new Promise(r => setTimeout(r, 1500)); // la página recién abierta alcanza a escuchar
+    (await self.clients.matchAll({ type: "window" })).forEach(c => c.postMessage("fierro-update"));
+  }
+}
 
 self.addEventListener("fetch", e => {
   const req = e.request;
@@ -18,13 +28,12 @@ self.addEventListener("fetch", e => {
   const url = new URL(req.url);
   if (url.hostname === "api.github.com") return; // la sincronización nunca se cachea
 
-  // Página: red primero (con límite de 3 s) para recibir actualizaciones; si no hay señal, la copia guardada.
+  // Página: abre al instante con la copia guardada y descarga la versión nueva en segundo plano
+  // (se ve la próxima vez que abras la app). Sin copia guardada, va a la red.
   if (req.mode === "navigate") {
-    e.respondWith(
-      Promise.race([fetch(req), timeout(3000)])
-        .then(res => { const c = res.clone(); caches.open(CACHE).then(ca => ca.put("index.html", c)); return res; })
-        .catch(() => caches.match("index.html"))
-    );
+    const net = fetch(req).then(res => { if (res.ok) e.waitUntil(store(res.clone())); return res; });
+    e.respondWith(caches.match("index.html").then(hit => hit || net).catch(() => net));
+    e.waitUntil(net.then(() => null, () => null));
     return;
   }
   // Fuentes y librerías externas: caché primero, se guardan la primera vez.
