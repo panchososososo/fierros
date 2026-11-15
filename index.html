@@ -366,8 +366,11 @@ function recommend(it,ex,excl){
   if(!w0)return{...base,badge:["keep","Anota el peso"],why:"La vez pasada no quedó el peso. Usa el mismo y anótalo hoy.",rows:plus1(null)};
   const step=stepFor(ex,w0);
   const minW=isBarbell(ex)&&!/smith/i.test(ex)?S.settings.bar:step;
-  if(days>60){const w=Math.max(minW,roundTo(0.8*loadForReps(E,mid+3),step));
-    return{...base,badge:["new","Retomando"],why:`Tu último registro es de hace ${Math.round(days/30)} meses. Parte con ${fmt1(w)} kg dejando 3 en reserva.`,rows:rows(w,it.lo)};}
+  if(days>60){
+    // Al retomar, la última sesión puede ser un día flojo: usa la mejor de los 6 meses previos a ella.
+    let R=E,rT=L.t;historyOf(ex,excl).forEach(h=>{if(L.t-h.t>180*DAY)return;h.sets.forEach(x=>{const v=setE(ex,x,h.t).v;if(v>R){R=v;rT=h.t;}});});
+    const w=Math.max(minW,roundTo(0.8*loadForReps(R,mid+3),step));
+    return{...base,badge:["new","Retomando"],why:`Tu último registro es de hace ${Math.round(days/30)} meses. Parte con ${fmt1(w)} kg dejando 3 en reserva${rT!==L.t?` (calculado desde tu mejor sesión reciente, el ${fmtD(rT)})`:""}.`,rows:rows(w,it.lo)};}
   if(allTop||tooEasy){
     let w=roundTo(loadForReps(E,mid+it.rir),step);w=Math.max(w,w0+step);w=Math.min(w,w0+2*step);
     if((w-w0)/w0>0.25){const r=rows(w0,it.hi);r[0]={w,r:Math.max(6,it.lo-4)};
