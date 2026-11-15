@@ -135,7 +135,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 .week button[aria-pressed="true"]{background:var(--chalk);color:var(--onink)}.week button[aria-pressed="true"] b{color:var(--onink)}
 .week button.today{box-shadow:inset 0 -3px 0 var(--accent)}
 .week button.trained::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--green);margin-top:1px}
-.week button:disabled{opacity:.55}
+.week button[data-rest]{color:var(--muted)}.week button[data-rest] b{color:var(--muted)}.week button[data-rest][aria-pressed="true"],.week button[data-rest][aria-pressed="true"] b{color:var(--onink)}
 .dayhead{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:6px}
 .dayname{font:700 42px/0.95 "Barlow Condensed",Arial,sans-serif;margin:2px 0 0}
 .dmeta{font-size:13px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
@@ -146,7 +146,9 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 .xrow .big{font:600 24px/1 "Barlow Condensed",Arial,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}.xrow .big small{font-size:14px;color:var(--muted);font-weight:500}
 .xrow .s{font-size:12px;color:var(--muted)}
 .xrow .w{grid-column:1/3;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.xrow.open .w,.xrow.fixed .w{white-space:normal}
+.xrow.fixed .w{white-space:normal}
+.xrow:active{background:var(--surface)}
+.why{background:var(--surface2);border-radius:12px;padding:10px 12px;margin:4px 0 8px}.why .whyt{font:600 22px "Barlow Condensed",Arial,sans-serif}.why .whyt small{font-size:13px;color:var(--muted)}
 .xrow .l{grid-column:1/3;font-size:12px;color:var(--muted);display:none;font-variant-numeric:tabular-nums}.xrow.open .l{display:block}
 .chipwarn{font:600 12px Barlow,Arial,sans-serif;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);background:color-mix(in srgb,var(--accent) 10%,transparent);padding:4px 10px;border-radius:999px;min-height:32px}
 .hbtns{display:flex;gap:8px;align-items:center}
@@ -218,7 +220,7 @@ table.sets tr.cur td:first-child{border-left-color:var(--accent)}
 <script>
 (function(){
 "use strict";
-const APP_VER="3.0.0";
+const APP_VER="3.0.1";
 const LS="fierro_pwa_v1";
 const DAY=864e5;
 const $=s=>document.querySelector(s);
@@ -456,7 +458,7 @@ function nextDay(){
   return{k:S.routine[0]?.k,date:d};}
 
 /* ================= navegación ================= */
-let view="train";let pickDay=null;
+let view="train";let pickDay=null;let pickRest=null;
 function go(v){view=v;$$("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));render();window.scrollTo(0,0);}
 $$("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.v));
 function render(){document.body.classList.toggle("insession",!!S.active&&view==="train");({train:renderTrain,history:renderHistory,progress:renderProgress,routine:renderRoutine,settings:renderSettings})[view]();syncBadge();renderHdr();renderDock();}
@@ -525,10 +527,11 @@ function noteSheet(name,done){const c=canon(name);const d=$("#dlg");const cur=(S
   if(!d.open)d.showModal();$("#nc").onclick=()=>d.close();
   $("#ns").onclick=()=>{const v=$("#ntx").value.trim();const o={...(S.exMeta[c]||{})};if(v)o.note=v;else delete o.note;
     if(Object.keys(o).length)S.exMeta[c]=o;else delete S.exMeta[c];S.mu=Date.now();save();autoSync();d.close();toast(v?"Nota guardada":"Nota borrada",1600);if(done)done();};}
-function exerciseSheet(name){
+function exerciseSheet(name,top){
   const c=canon(name);const m=meta(c);const hist=historyOf(c);const d=$("#dlg");
   const al=Object.keys(S.exMeta||{}).filter(k=>k!==c&&S.exMeta[k].alias&&canon(k)===c);
   let h=`<h3>${esc(c)}</h3><p class="small muted" style="margin:2px 0 6px">${esc(TYPES[m.type])} · ${m.p?esc(m.p+(m.s&&m.s.length?" + "+m.s.join(", "):"")):"sin músculo asignado"} · ${esc(equip(c))}</p>`;
+  if(top)h+=top;
   if(al.length)h+=`<p class="small muted" style="margin:0 0 6px">También registrado como: ${al.map(esc).join(", ")}</p>`;
   if(m.note)h+=`<div class="exnote">${esc(m.note)}</div>`;
   const metric=m.type==="time"?"reps":"e1rm";
@@ -536,7 +539,7 @@ function exerciseSheet(name){
   h+=`<div class="prs">${prsOf(c).map(([n,l,x])=>`<div class="pr"><div class="num">${n}</div><div class="lbl">${l}</div><div class="lbl">${x}</div></div>`).join("")}</div>`;
   h+=`<h3 style="font-size:18px;margin:16px 0 4px">Últimas sesiones</h3><ul class="list">${hist.slice(-6).reverse().map(x=>`<li style="padding:8px 0"><span class="small muted">${fmtD(x.t)}</span><br><span class="small" style="font-variant-numeric:tabular-nums">${x.sets.map(s=>esc(setTxt(s,c))).join(" · ")}</span></li>`).join("")||`<li class="muted small">Sin registros.</li>`}</ul>`;
   h+=`<div class="menu"><button id="fNote">Nota fija</button><button id="fType">Tipo y músculos</button><button id="fMerge">Unir con otro ejercicio…</button>${al.length?`<button id="fSplit">Separar nombres unidos</button>`:""}</div><button class="btn ghost full" id="fX">Cerrar</button>`;
-  d.innerHTML=h;if(!d.open)d.showModal();
+  d.innerHTML=h;if(!d.open)d.showModal();d.scrollTop=0;$("#fX").blur();
   $("#fX").onclick=()=>d.close();
   $("#fNote").onclick=()=>noteSheet(c,()=>{if(S.active&&view==="train")renderActive();exerciseSheet(c);});
   $("#fType").onclick=()=>exMetaSheet(c,()=>render());
@@ -578,10 +581,22 @@ function renderTrain(){
   h+=`<div class="week" role="group" aria-label="Esta semana">`;
   for(let i=0;i<7;i++){const d=new Date(ws+i*DAY+12*3600e3);const dow=d.getDay();const r=S.routine.find(x=>x.dow===dow);
     const cls=(d.toDateString()===now.toDateString()?"today ":"")+(trained.has(d.toDateString())?"trained":"");
-    h+=`<button class="${cls}" ${r?`data-day="${esc(r.k)}" aria-pressed="${r.k===pickDay}" aria-label="${DN[dow]}: ${esc(r.k)}"`:`disabled aria-label="${DN[dow]}: sin sesión"`}>${DL[i]}<b>${r?esc(abbr(r.k)):"·"}</b></button>`;}
+    h+=`<button class="${cls}" ${r?`data-day="${esc(r.k)}" aria-pressed="${pickRest==null&&r.k===pickDay}" aria-label="${DN[dow]}: ${esc(r.k)}"`:`data-rest="${i}" aria-pressed="${pickRest===i}" aria-label="${DN[dow]}: descanso"`}>${DL[i]}<b>${r?esc(abbr(r.k)):"–"}</b></button>`;}
   h+=`</div>`;
   const others=S.routine.filter(r=>r.dow==null);
-  if(others.length)h+=`<div class="hscroll" style="margin-top:8px;align-items:center" role="group" aria-label="Otras sesiones"><span class="small muted">Otras</span>${others.map(r=>`<button class="chip" data-day="${esc(r.k)}" aria-pressed="${r.k===pickDay}">${esc(r.k)}</button>`).join("")}</div>`;
+  if(others.length)h+=`<div class="hscroll" style="margin-top:8px;align-items:center" role="group" aria-label="Otras sesiones"><span class="small muted">Otras</span>${others.map(r=>`<button class="chip" data-day="${esc(r.k)}" aria-pressed="${pickRest==null&&r.k===pickDay}">${esc(r.k)}</button>`).join("")}</div>`;
+  if(pickRest!=null){const d=new Date(ws+pickRest*DAY+12*3600e3);const ds=d.toDateString();
+    const done=live().filter(x=>new Date(x.t).toDateString()===ds);
+    h+=`<div class="dayhead"><div><p class="small muted" style="margin:0">${esc(d.toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long"}))}</p><p class="dayname">${done.length?"Entrenaste":"Descanso"}</p></div></div>`;
+    if(done.length)h+=`<div class="xlist" style="margin-top:10px">${done.map(x=>{const n=x.ex.filter(e=>e.sets&&e.sets.length).length;const st=x.ex.reduce((a,e)=>a+(e.sets||[]).length,0);const dur=x.end?Math.round((x.end-x.t)/60000):0;
+      return`<button class="xrow" data-hs="${esc(x.id)}"><span class="n">${esc(x.name||"Entrenamiento")}</span><span class="v">${n} ejercicios · ${st} series${dur?` · ${dur} min`:""}</span><span class="t"><span class="s">Ver</span></span></button>`;}).join("")}</div>`;
+    else h+=`<p class="small muted" style="margin:6px 0 0">No hay sesión de la rutina este día.</p>`;
+    h+=`<p class="sect" style="margin-top:22px">Entrenar igual</p><div class="hscroll" style="margin-top:8px">${S.routine.map(r=>`<button class="chip" data-day="${esc(r.k)}">${esc(r.k)}</button>`).join("")}</div>`;
+    $("#view").innerHTML=h;
+    $$("[data-day]").forEach(b=>b.onclick=()=>{pickRest=null;pickDay=b.dataset.day;renderTrain();renderDock();});
+    $$("[data-rest]").forEach(b=>b.onclick=()=>{pickRest=+b.dataset.rest;renderTrain();renderDock();});
+    $$("[data-hs]").forEach(b=>b.onclick=()=>go("history"));
+    return;}
   h+=`<div class="dayhead"><div><p class="small muted" style="margin:0">${pickDay===nd.k?"Próxima sesión · "+nd.date.toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long"}):"Otro día de la rutina"}</p><p class="dayname">${esc(pickDay||"Sin rutina")}</p></div></div>`;
   if(day){const st=dayStats(day);
     h+=`<div class="dmeta"><span>${st.n} ejercicios</span><span>${st.sets} series</span><span>≈ ${st.min} min</span></div><div class="xlist">`;
@@ -589,11 +604,13 @@ function renderTrain(){
       if(it.fixed){h+=`<div class="xrow fixed"><span class="n">${esc(it.n)}</span><span class="w"><span style="color:var(--ink)">${esc(it.fixed)}</span>${it.why?" · "+esc(it.why):""}</span></div>`;return;}
       const ex=pickVariant(it);const R=recommend(it,ex);const m=meta(ex);
       const sub=it.np?"calidad":m.type==="time"?"":`${it.lo===it.hi?it.lo:it.lo+"–"+it.hi} reps · RIR ${it.rir}`;
-      h+=`<button class="xrow" data-xr="${ii}" aria-expanded="false"><span class="n">${esc(it.n)}</span><span class="v">${esc(ex)}</span><span class="t"><span class="big" style="display:block">${bigTarget(R.rows,ex)}</span><span class="s">${sub}</span></span><span class="w"><span class="badge b-${R.badge[0]}">${esc(R.badge[1])}</span>${esc(R.why)}</span>${R.lastTxt?`<span class="l">Última vez ${esc(R.lastTxt)}</span>`:""}</button>`;});
-    h+=`</div><p class="small muted" style="margin-top:10px">Toca un ejercicio para ver el motivo completo.</p>`;}
+      h+=`<button class="xrow" data-xr="${ii}" aria-haspopup="dialog"><span class="n">${esc(it.n)}</span><span class="v">${esc(ex)}</span><span class="t"><span class="big" style="display:block">${bigTarget(R.rows,ex)}</span><span class="s">${sub}</span></span><span class="w"><span class="badge b-${R.badge[0]}">${esc(R.badge[1])}</span>${esc(R.why)}</span>${R.lastTxt?`<span class="l">Última vez ${esc(R.lastTxt)}</span>`:""}</button>`;});
+    h+=`</div><p class="small muted" style="margin-top:10px">Toca un ejercicio para ver por qué ese peso, su historial y récords.</p>`;}
   $("#view").innerHTML=h;
-  $$("[data-day]").forEach(b=>b.onclick=()=>{pickDay=b.dataset.day;renderTrain();renderDock();});
-  $$("[data-xr]").forEach(b=>b.onclick=()=>{const o=b.classList.toggle("open");b.setAttribute("aria-expanded",o);});
+  $$("[data-day]").forEach(b=>b.onclick=()=>{pickRest=null;pickDay=b.dataset.day;renderTrain();renderDock();});
+  $$("[data-rest]").forEach(b=>b.onclick=()=>{pickRest=+b.dataset.rest;renderTrain();renderDock();});
+  $$("[data-xr]").forEach(b=>b.onclick=()=>{const it=day.items[+b.dataset.xr];const ex=pickVariant(it);const R=recommend(it,ex);
+    exerciseSheet(ex,`<div class="why"><div class="row" style="gap:8px;align-items:baseline;flex-wrap:nowrap"><span class="badge b-${R.badge[0]}">${esc(R.badge[1])}</span><b class="whyt">${bigTarget(R.rows,ex)}</b></div><p style="margin:6px 0 0">${esc(R.why)}</p>${R.lastTxt?`<p class="small muted" style="margin:4px 0 0">Última vez: ${esc(R.lastTxt)}</p>`:""}</div>`);});
   const it=$("#instTop");if(it)it.onclick=doInstall;
 }
 function startSession(dayKey,editing){
@@ -798,8 +815,9 @@ function renderDock(){
   if(A&&!A.editing)elInt=setInterval(()=>{if(!S.active)return;const t=mmss((Date.now()-S.active.t)/1000);const a=$("#elap");if(a)a.textContent=t;const b=$("#elap2");if(b)b.textContent=t;},1000);
   if(!A&&!rEnd){
     if(view==="train"){dock.style.display="block";dock.classList.remove("alarm");
-      inn.innerHTML=`<button class="btn" id="dStart" style="flex:1">Empezar ${esc(pickDay||"")}</button><button class="btn ghost small" id="dFree" style="min-height:48px">Libre</button>`;
-      $("#dStart").onclick=()=>startSession(pickDay);$("#dFree").onclick=()=>startSession(null);}
+      if(pickRest!=null){inn.innerHTML=`<button class="btn" id="dFree" style="flex:1">Entrenamiento libre</button>`;$("#dFree").onclick=()=>startSession(null);}
+      else{inn.innerHTML=`<button class="btn" id="dStart" style="flex:1">Empezar ${esc(pickDay||"")}</button><button class="btn ghost small" id="dFree" style="min-height:48px">Libre</button>`;
+      $("#dStart").onclick=()=>startSession(pickDay);$("#dFree").onclick=()=>startSession(null);}}
     else dock.style.display="none";return;}
   dock.style.display="block";
   if(rEnd&&alarmInt){dock.classList.add("alarm");inn.innerHTML=`<span class="num grow">¡Dale!</span><button class="db" id="dOk" style="min-width:120px">Listo</button>`;$("#dOk").onclick=stopRest;return;}

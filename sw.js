@@ -1,5 +1,5 @@
 // Fierro service worker: funciona sin conexión.
-const CACHE = "fierro-v3.0.0";
+const CACHE = "fierro-v3.0.1";
 const SHELL = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png"];
 
 self.addEventListener("install", e => {
