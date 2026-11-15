@@ -1,5 +1,5 @@
 // Fierro service worker: funciona sin conexión.
-const CACHE = "fierro-v4.1.0";
+const CACHE = "fierro-v4.2.0";
 const SHELL = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png"];
 
 self.addEventListener("install", e => {
@@ -36,8 +36,8 @@ self.addEventListener("fetch", e => {
     e.waitUntil(net.then(() => null, () => null));
     return;
   }
-  // Fuentes y librerías externas: caché primero, se guardan la primera vez.
-  if (/fonts\.(googleapis|gstatic)\.com|cdnjs\.cloudflare\.com/.test(url.hostname)) {
+  // Fuentes, librerías e imágenes de ejercicios: caché primero, se guardan la primera vez.
+  if (/fonts\.(googleapis|gstatic)\.com|cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net/.test(url.hostname)) {
     e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(res => { const c = res.clone(); caches.open(CACHE).then(ca => ca.put(req, c)); return res; })));
     return;
   }
